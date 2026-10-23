@@ -6,6 +6,10 @@
   "license": "MIT",
   "publisher": "funara",
   "author": "Funara (ARA AI Ecosystem)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/funara/aracommit.git"
+  },
   "engines": {
     "vscode": "^1.93.0"
   },
@@ -555,9 +559,9 @@
     "watch": "node esbuild.js --watch",
     "build:prod": "node esbuild.js --production",
     "build:analyze": "node esbuild.js --production --analyze",
-    "package": "vsce package --no-dependencies --allow-missing-repository --no-rewrite-relative-links",
-    "package:notsc": "npm run vscode:prepublish:tsc && vsce package --no-dependencies --allow-missing-repository --no-rewrite-relative-links",
-    "package:analyze": "npm run build:analyze && vsce package --no-dependencies --allow-missing-repository --no-rewrite-relative-links",
+    "package": "vsce package --no-dependencies",
+    "package:notsc": "npm run vscode:prepublish:tsc && vsce package --no-dependencies",
+    "package:analyze": "npm run build:analyze && vsce package --no-dependencies",
     "lint": "eslint \"src/**/*.ts\"",
     "lint:fix": "eslint \"src/**/*.ts\" --fix",
     "typecheck": "tsc --noEmit",

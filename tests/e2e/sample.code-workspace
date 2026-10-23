@@ -8,7 +8,7 @@
         "git.autoRepositoryDetection": false,
         "git.openRepositoryInParentFolders": "never",
         "aracommit.provider.type": "openai",
-        "aracommit.openai.baseUrl": "http://127.0.0.1:63137/v1",
+        "aracommit.openai.baseUrl": "http://127.0.0.1:63876/v1",
         "aracommit.commit.autoCommit": true,
         "aracommit.commit.autoPush": true
     }

@@ -12,7 +12,6 @@ tests/**
 docs/**
 .claude/**
 .aracommit/**
-
 # Configuration files
 .gitignore
 esbuild.js
