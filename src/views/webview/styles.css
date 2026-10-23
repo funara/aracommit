@@ -39,8 +39,8 @@ body {
     font-size: 12px;
 }
 
-/* ── A. Provider picker (always visible) ─────────────────────────────── */
-section.provider-pick {
+/* ── Provider picker inside Model & Authentication ──────────────────── */
+.provider-pick {
     margin: 0 0 16px;
     padding: 0 2px;
 }
@@ -237,8 +237,19 @@ button:focus-visible {
 }
 
 button#refresh-models {
-    flex: 0 0 auto;
-    padding: 0 9px;
+    flex: 0 0 var(--cs-control-h);
+    width: var(--cs-control-h);
+    padding: 0;
+}
+@keyframes model-refresh-spin {
+    to { transform: rotate(360deg); }
+}
+button#refresh-models[aria-busy="true"] svg {
+    transform-origin: center;
+    animation: model-refresh-spin 0.8s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+    button#refresh-models[aria-busy="true"] svg { animation: none; }
 }
 
 button:disabled,
@@ -272,6 +283,17 @@ textarea:disabled {
     text-decoration: underline;
 }
 
+.credential-heading {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+.credential-saved {
+    color: var(--vscode-testing-iconPassed, var(--vscode-charts-green, #89d185));
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+}
 .credential-panel {
     display: flex;
     flex-direction: column;
@@ -292,9 +314,6 @@ textarea:disabled {
     height: 7px;
     border-radius: 50%;
     background: currentColor;
-}
-.credential-status.saved {
-    color: var(--vscode-testing-iconPassed, var(--vscode-charts-green, #89d185));
 }
 .credential-status.needed {
     color: var(--vscode-editorWarning-foreground, #cca700);
@@ -320,6 +339,7 @@ textarea:disabled {
     align-items: center;
     margin: 9px 0;
 }
+.checkbox-row.custom-instructions-toggle { margin-top: 16px; }
 /* Boolean settings render as a premium toggle switch (built on the native
    checkbox so keyboard / a11y semantics are unchanged). All colors are
    theme-driven: off = input surface + border, on = button accent. */

@@ -31,8 +31,6 @@ export interface ProviderMeta {
     removeCmd: string;
     /** "Get a key" deep link; omitted for providers with no hosted console. */
     apiKeyUrl?: string;
-    /** Human description of where the live model list comes from. */
-    liveSource: string;
     /** True when there is no live `/models` endpoint (UI hides refresh). */
     noRefresh?: boolean;
     /** Validates a pasted key; returns an error string or null when valid. */
@@ -50,7 +48,6 @@ export const PROVIDER_CATALOG: readonly ProviderMeta[] = ([
         setCmd: 'aracommit.setApiKey',
         removeCmd: 'aracommit.removeApiKey',
         apiKeyUrl: 'https://aistudio.google.com/app/apikey',
-        liveSource: 'Google Generative Language',
         validateKey: ApiKeyValidator.validateGeminiApiKey,
     },
     {
@@ -61,7 +58,6 @@ export const PROVIDER_CATALOG: readonly ProviderMeta[] = ([
         setCmd: 'aracommit.setOpenRouterApiKey',
         removeCmd: 'aracommit.removeOpenRouterApiKey',
         apiKeyUrl: 'https://openrouter.ai/keys',
-        liveSource: 'OpenRouter /api/v1/models',
         validateKey: lax,
     },
     {
@@ -72,7 +68,6 @@ export const PROVIDER_CATALOG: readonly ProviderMeta[] = ([
         setCmd: 'aracommit.setAnthropicApiKey',
         removeCmd: 'aracommit.removeAnthropicApiKey',
         apiKeyUrl: 'https://console.anthropic.com/settings/keys',
-        liveSource: 'Static list (Anthropic has no public /models endpoint)',
         noRefresh: true,
         validateKey: lax,
     },
@@ -84,7 +79,6 @@ export const PROVIDER_CATALOG: readonly ProviderMeta[] = ([
         setCmd: 'aracommit.setOpenAIApiKey',
         removeCmd: 'aracommit.removeOpenAIApiKey',
         apiKeyUrl: 'https://platform.openai.com/api-keys',
-        liveSource: 'OpenAI /v1/models (gpt-* / o-series)',
         validateKey: lax,
     },
     {
@@ -95,7 +89,6 @@ export const PROVIDER_CATALOG: readonly ProviderMeta[] = ([
         setCmd: 'aracommit.setDeepSeekApiKey',
         removeCmd: 'aracommit.removeDeepSeekApiKey',
         apiKeyUrl: 'https://platform.deepseek.com/api_keys',
-        liveSource: 'DeepSeek /models',
         validateKey: lax,
     },
     {
@@ -106,7 +99,6 @@ export const PROVIDER_CATALOG: readonly ProviderMeta[] = ([
         setCmd: 'aracommit.setXaiApiKey',
         removeCmd: 'aracommit.removeXaiApiKey',
         apiKeyUrl: 'https://console.x.ai/',
-        liveSource: 'xAI /v1/models',
         validateKey: lax,
     },
     {
@@ -117,7 +109,6 @@ export const PROVIDER_CATALOG: readonly ProviderMeta[] = ([
         setCmd: 'aracommit.setOllamaAuthToken',
         removeCmd: 'aracommit.removeOllamaAuthToken',
         // no hosted console — local
-        liveSource: '/api/tags (local)',
         validateKey: lax,
     },
     {
@@ -127,9 +118,7 @@ export const PROVIDER_CATALOG: readonly ProviderMeta[] = ([
         secretKey: 'aracommit.customApiKey',
         setCmd: 'aracommit.setCustomApiKey',
         removeCmd: 'aracommit.removeCustomApiKey',
-        // no listing endpoint, no console
-        liveSource: 'Free-form — type the model your endpoint exposes',
-        noRefresh: true,
+        // no hosted console
         validateKey: lax,
     },
 ] satisfies ProviderMeta[]).sort((a, b) => a.label.localeCompare(b.label));

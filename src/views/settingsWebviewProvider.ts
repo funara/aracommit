@@ -86,6 +86,7 @@ export class SettingsWebviewProvider implements vscode.WebviewViewProvider {
         PROVIDERS.map((p): [Provider, ModelSlot] => [p, { list: [], loading: false, error: null }]),
     ) as Record<Provider, ModelSlot>;
     private readonly modelRequestIds = new Map<Provider, number>();
+    private customModelSettings: { baseUrl: string; useApiKey: boolean } | undefined;
 
     constructor(private readonly context: vscode.ExtensionContext) {}
 
@@ -111,6 +112,7 @@ export class SettingsWebviewProvider implements vscode.WebviewViewProvider {
 
         const configSub = vscode.workspace.onDidChangeConfiguration(e => {
             if (e.affectsConfiguration('aracommit')) {
+                this.syncCustomModelSettings();
                 void this.pushState();
             }
         });
@@ -118,6 +120,9 @@ export class SettingsWebviewProvider implements vscode.WebviewViewProvider {
         // so the "● set" indicator drifts unless we also listen to SecretStorage.
         const secretSub = this.context.secrets.onDidChange(e => {
             if (SECRET_KEYS.includes(e.key)) {
+                if (e.key === providerDef('custom').secretKey && ConfigService.get('custom.useApiKey')) {
+                    this.invalidateModelsFor('custom');
+                }
                 void this.pushState();
             }
         });
@@ -156,6 +161,8 @@ export class SettingsWebviewProvider implements vscode.WebviewViewProvider {
                         refreshProvider = 'openai';
                     } else if (msg.key === SETTING_KEYS.ollamaBaseUrl || msg.key === SETTING_KEYS.ollamaUseAuthToken) {
                         refreshProvider = 'ollama';
+                    } else if (msg.key === SETTING_KEYS.customBaseUrl || msg.key === SETTING_KEYS.customUseApiKey) {
+                        refreshProvider = 'custom';
                     }
                     if (refreshProvider) {
                         await this.refreshModelsFor(refreshProvider, msg.key !== SETTING_KEYS.provider);
@@ -174,8 +181,7 @@ export class SettingsWebviewProvider implements vscode.WebviewViewProvider {
 
                 case 'removeApiKey': {
                     await vscode.commands.executeCommand(providerDef(msg.provider).removeCmd);
-                    this.modelRequestIds.set(msg.provider, (this.modelRequestIds.get(msg.provider) ?? 0) + 1);
-                    Object.assign(this.models[msg.provider], { list: [], loading: false, error: null });
+                    this.invalidateModelsFor(msg.provider);
                     await this.pushState();
                     return;
                 }
@@ -201,7 +207,27 @@ export class SettingsWebviewProvider implements vscode.WebviewViewProvider {
         }
     }
 
+    private invalidateModelsFor(provider: Provider): void {
+        this.modelRequestIds.set(provider, (this.modelRequestIds.get(provider) ?? 0) + 1);
+        Object.assign(this.models[provider], { list: [], loading: false, error: null });
+    }
+
+    private syncCustomModelSettings(): void {
+        const current = {
+            baseUrl: ConfigService.get('custom.baseUrl'),
+            useApiKey: ConfigService.get('custom.useApiKey'),
+        };
+        const previous = this.customModelSettings;
+        if (previous && (previous.baseUrl !== current.baseUrl || previous.useApiKey !== current.useApiKey)) {
+            this.invalidateModelsFor('custom');
+        }
+        this.customModelSettings = current;
+    }
+
     private async refreshModelsFor(provider: Provider, force: boolean): Promise<void> {
+        if (provider === 'custom') {
+            this.syncCustomModelSettings();
+        }
         const slot = this.models[provider];
         if (!force && (slot.loading || slot.list.length > 0)) {
             return;

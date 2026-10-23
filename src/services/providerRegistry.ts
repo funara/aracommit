@@ -3,6 +3,7 @@ import { ApiKeyManager } from '../services/apiKeyManager';
 import {
     fetchGeminiModels,
     fetchOpenAIModels,
+    fetchCustomModels,
     fetchOllamaModels,
     fetchOpenRouterModels,
     fetchAnthropicModels,
@@ -84,9 +85,12 @@ const PROVIDER_BEHAVIOR: Record<Provider, Pick<ProviderDef, 'selectedModel' | 'f
     },
     custom: {
         selectedModel: () => ConfigService.get('custom.model'),
-        // Custom has no listing endpoint — user types the model manually.
-        // Returning an empty list lets the dropdown render just the configured model.
-        fetchModels: async () => [],
+        fetchModels: async () => {
+            const apiKey = ConfigService.get('custom.useApiKey')
+                ? await ApiKeyManager.getOptionalKey('custom')
+                : undefined;
+            return fetchCustomModels(ConfigService.get('custom.baseUrl'), apiKey);
+        },
     },
 };
 
@@ -122,8 +126,4 @@ export const API_KEY_URLS: Partial<Record<Provider, string>> = Object.fromEntrie
 
 export const PROVIDER_LABELS = Object.fromEntries(
     PROVIDER_DEFS.map(d => [d.id, d.label]),
-) as Record<Provider, string>;
-
-export const PROVIDER_LIVE_SOURCES = Object.fromEntries(
-    PROVIDER_DEFS.map(d => [d.id, d.liveSource]),
 ) as Record<Provider, string>;

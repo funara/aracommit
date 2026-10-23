@@ -29,6 +29,7 @@ export interface WebviewL10n {
     modelPlaceholder: string;
     refresh: string;
     refreshing: string;
+    fetchModels: string;
     baseUrl: string;
     path: string;
     apiKey: string;
@@ -44,7 +45,6 @@ export interface WebviewL10n {
     useAuthToken: string;
     useApiKey: string;
     preferFreeModels: string;
-    liveFrom: string;
     notInList: string;
     commit: string;
     format: string;
@@ -84,7 +84,6 @@ export interface WebviewL10n {
     ollamaNumCtxHint: string;
     autoOption: string;
     providerLabels: Record<Provider, string>;
-    liveSource: Record<Provider, string>;
 }
 
 /** One-shot payload embedded in the page; never changes after first render. */

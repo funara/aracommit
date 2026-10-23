@@ -63,7 +63,7 @@ describe('fetchOpenAIModels ordering', () => {
     });
 
     it('coerces an entry with no id to "" and drops it', async () => {
-        mockedGetJson.mockResolvedValue({ data: [{}, { id: 'gpt-4o' }] });
+        mockedGetJson.mockResolvedValue({ data: [{ id: 42 }, {}, { id: 'gpt-4o' }] });
         expect(await fetchOpenAIModels('key', 'https://api.openai.test')).toEqual(['gpt-4o']);
     });
 

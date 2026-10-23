@@ -9,7 +9,6 @@ import type { ViewState } from './protocol';
 import { send } from './vscodeApi';
 import { preserveFocus } from './preserveFocus';
 import {
-    renderProviderPick,
     renderModelAuthSection,
     renderCommitSection,
     renderSmartCommitSection,
@@ -20,7 +19,6 @@ const root = document.getElementById('root') as HTMLElement;
 
 function build(state: ViewState): void {
     const fragment = document.createDocumentFragment();
-    fragment.appendChild(renderProviderPick(state));
     fragment.appendChild(renderModelAuthSection(state));
     fragment.appendChild(renderCommitSection(state));
     fragment.appendChild(renderSmartCommitSection(state));

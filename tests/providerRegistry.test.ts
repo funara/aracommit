@@ -5,6 +5,7 @@ const {
     mockGetOptionalKey,
     fetchGeminiModels,
     fetchOpenAIModels,
+    fetchCustomModels,
     fetchOllamaModels,
     fetchOpenRouterModels,
     fetchAnthropicModels,
@@ -15,6 +16,7 @@ const {
     mockGetOptionalKey: vi.fn(),
     fetchGeminiModels: vi.fn(),
     fetchOpenAIModels: vi.fn(),
+    fetchCustomModels: vi.fn(),
     fetchOllamaModels: vi.fn(),
     fetchOpenRouterModels: vi.fn(),
     fetchAnthropicModels: vi.fn(),
@@ -33,6 +35,7 @@ vi.mock('../src/services/apiKeyManager', () => ({
 vi.mock('../src/services/modelLists', () => ({
     fetchGeminiModels,
     fetchOpenAIModels,
+    fetchCustomModels,
     fetchOllamaModels,
     fetchOpenRouterModels,
     fetchAnthropicModels,
@@ -47,7 +50,6 @@ import {
     SECRET_KEYS,
     API_KEY_URLS,
     PROVIDER_LABELS,
-    PROVIDER_LIVE_SOURCES,
     providerDef,
 } from '../src/services/providerRegistry';
 
@@ -57,6 +59,7 @@ beforeEach(() => {
     mockGetOptionalKey.mockResolvedValue('a-key');
     fetchGeminiModels.mockResolvedValue(['g']);
     fetchOpenAIModels.mockResolvedValue(['o']);
+    fetchCustomModels.mockResolvedValue(['c']);
     fetchOllamaModels.mockResolvedValue(['ol']);
     fetchOpenRouterModels.mockResolvedValue(['or']);
     fetchAnthropicModels.mockResolvedValue(['an']);
@@ -73,9 +76,7 @@ describe('providerRegistry derived exports', () => {
     });
 
     it('NO_REFRESH_PROVIDERS contains only providers flagged noRefresh', () => {
-        expect([...NO_REFRESH_PROVIDERS].sort()).toEqual(
-            ['anthropic', 'custom'].sort(),
-        );
+        expect([...NO_REFRESH_PROVIDERS]).toEqual(['anthropic']);
     });
 
     it('SECRET_KEYS lists every secret key', () => {
@@ -95,10 +96,6 @@ describe('providerRegistry derived exports', () => {
         expect(PROVIDER_LABELS.custom).toBe('Custom (OpenAI-compatible)');
     });
 
-    it('PROVIDER_LIVE_SOURCES maps id to liveSource', () => {
-        expect(PROVIDER_LIVE_SOURCES.gemini).toBe('Google Generative Language');
-        expect(PROVIDER_LIVE_SOURCES.ollama).toBe('/api/tags (local)');
-    });
 });
 
 describe('providerDef()', () => {
@@ -189,8 +186,22 @@ describe('fetchModels() success paths', () => {
         expect(mockGetOptionalKey).not.toHaveBeenCalled();
     });
 
-    it('custom returns an empty list without calling any fetcher', async () => {
-        expect(await providerDef('custom').fetchModels()).toEqual([]);
+    it('custom fetches models without auth when the toggle is off', async () => {
+        mockGet.mockImplementation((k: string) => (k === 'custom.baseUrl' ? 'http://localhost:1234/v1' : undefined));
+        expect(await providerDef('custom').fetchModels()).toEqual(['c']);
+        expect(fetchCustomModels).toHaveBeenCalledWith('http://localhost:1234/v1', undefined);
+        expect(mockGetOptionalKey).not.toHaveBeenCalled();
+    });
+
+    it('custom fetches models with the saved key when auth is enabled', async () => {
+        mockGet.mockImplementation((k: string) => {
+            if (k === 'custom.baseUrl') return 'https://models.example/v1';
+            if (k === 'custom.useApiKey') return true;
+            return undefined;
+        });
+        expect(await providerDef('custom').fetchModels()).toEqual(['c']);
+        expect(mockGetOptionalKey).toHaveBeenCalledWith('custom');
+        expect(fetchCustomModels).toHaveBeenCalledWith('https://models.example/v1', 'a-key');
     });
 });
 

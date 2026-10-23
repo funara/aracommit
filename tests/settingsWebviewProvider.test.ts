@@ -13,11 +13,10 @@ vi.mock('../src/services/providerRegistry', () => {
     const providers = ['anthropic', 'custom', 'deepseek', 'gemini', 'ollama', 'openai', 'openrouter', 'xai'];
     return {
         PROVIDERS: providers,
-        NO_REFRESH_PROVIDERS: new Set(['anthropic', 'custom']),
+        NO_REFRESH_PROVIDERS: new Set(['anthropic']),
         SECRET_KEYS: [],
         API_KEY_URLS: {},
         PROVIDER_LABELS: Object.fromEntries(providers.map(id => [id, id])),
-        PROVIDER_LIVE_SOURCES: Object.fromEntries(providers.map(id => [id, id])),
         providerDef: (provider: string) => ({
             fetchModels: () => fetchModels(provider),
             selectedModel: () => selectedModel(provider),
@@ -46,6 +45,8 @@ function makeProvider(): Internals {
     return internals(new SettingsWebviewProvider({ subscriptions: [] } as unknown as vscode.ExtensionContext));
 }
 
+let configuredSettings: Record<string, string | boolean | number> = {};
+
 function deferred<T>(): { promise: Promise<T>; resolve(value: T): void } {
     let resolve!: (value: T) => void;
     const promise = new Promise<T>(r => { resolve = r; });
@@ -58,10 +59,17 @@ beforeEach(() => {
     selectedModel.mockReset();
     selectedModel.mockImplementation((provider: string) => `${provider}-model`);
     ConfigService.clearCache();
+    configuredSettings = {};
     vi.spyOn(vscode.workspace, 'getConfiguration').mockReturnValue({
         get: <T>(_key: string, defaultValue?: T) => defaultValue,
-        update: vi.fn(async () => undefined),
-        inspect: () => undefined,
+        update: vi.fn(async (key: string, value: string | boolean | number) => {
+            configuredSettings[key.replace(/^aracommit\./, '')] = value;
+            ConfigService.clearCache();
+        }),
+        inspect: (key: string) => {
+            const value = configuredSettings[key];
+            return value === undefined ? undefined : { globalValue: value };
+        },
     } as unknown as vscode.WorkspaceConfiguration);
 });
 
@@ -125,6 +133,8 @@ describe('SettingsWebviewProvider model refresh', () => {
             ['aracommit.openai.baseUrl', 'https://models.example/v1', 'openai'],
             ['aracommit.ollama.baseUrl', 'http://localhost:11434', 'ollama'],
             ['aracommit.ollama.useAuthToken', true, 'ollama'],
+            ['aracommit.custom.baseUrl', 'https://models.example/v1', 'custom'],
+            ['aracommit.custom.useApiKey', true, 'custom'],
         ];
 
         for (const [key, value] of changes) {
@@ -132,5 +142,43 @@ describe('SettingsWebviewProvider model refresh', () => {
         }
 
         expect(refresh.mock.calls).toEqual(changes.map(([, , target]) => [target, true]));
+    });
+
+    it('clears old Custom models when a changed endpoint fails and ignores a late response', async () => {
+        const provider = makeProvider();
+        selectedModel.mockImplementation((id: string) => id === 'custom' ? 'manual-model' : `${id}-model`);
+        fetchModels.mockResolvedValueOnce(['old-endpoint-model']);
+        await provider.refreshModelsFor('custom', true);
+
+        const oldResponse = deferred<string[]>();
+        fetchModels.mockReturnValueOnce(oldResponse.promise).mockRejectedValueOnce(new Error('new endpoint unavailable'));
+        const oldRequest = provider.refreshModelsFor('custom', true);
+        const newRequest = provider.handleMessage({
+            type: 'setSetting',
+            key: 'aracommit.custom.baseUrl',
+            value: 'https://new.example/v1',
+        });
+
+        await newRequest;
+        expect(provider.models.custom.list).toEqual([]);
+        expect(provider.models.custom.error).toBeTruthy();
+        oldResponse.resolve(['stale-model']);
+        await oldRequest;
+
+        expect(provider.models.custom.list).toEqual([]);
+        expect(provider.models.custom.loading).toBe(false);
+        expect((await provider.buildState()).selected.custom).toBe('manual-model');
+    });
+
+    it('preserves the configured Custom model when the endpoint returns an empty list', async () => {
+        const provider = makeProvider();
+        selectedModel.mockImplementation((id: string) => id === 'custom' ? 'manual-model' : `${id}-model`);
+        fetchModels.mockResolvedValueOnce([]);
+
+        await provider.refreshModelsFor('custom', true);
+
+        expect(provider.models.custom.list).toEqual([]);
+        expect(provider.models.custom.error).toBeNull();
+        expect((await provider.buildState()).selected.custom).toBe('manual-model');
     });
 });

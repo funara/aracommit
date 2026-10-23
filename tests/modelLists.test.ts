@@ -20,12 +20,45 @@ vi.mock('../src/services/geminiService', () => ({
 }));
 
 import {
+    fetchCustomModels,
     fetchOpenAIModels,
     fetchOllamaModels,
     fetchOpenRouterModels,
     fetchXaiModels,
     fetchAnthropicModels,
 } from '../src/services/modelLists';
+
+describe('fetchCustomModels', () => {
+    beforeEach(() => mockedGetJson.mockReset());
+
+    it('fetches every OpenAI-compatible model id from the base URL, with optional bearer auth', async () => {
+        mockedGetJson.mockResolvedValue({
+            data: [
+                { id: 'vendor/model' }, { id: 'gpt-4o' }, { id: 'vendor/model' },
+                { id: 42 }, null, {},
+            ],
+        });
+
+        const result = await fetchCustomModels('https://models.example/v1///', 'secret');
+
+        expect(mockedGetJson).toHaveBeenCalledWith(
+            'https://models.example/v1/models',
+            { headers: { Authorization: 'Bearer secret' }, signal: undefined },
+        );
+        expect(result).toEqual(['gpt-4o', 'vendor/model']);
+    });
+
+    it('omits auth when the custom endpoint does not use an API key', async () => {
+        mockedGetJson.mockResolvedValue({ data: [{ id: 'model-a' }, { id: null }] });
+
+        await fetchCustomModels('http://localhost:1234/v1');
+
+        expect(mockedGetJson).toHaveBeenCalledWith(
+            'http://localhost:1234/v1/models',
+            { headers: {}, signal: undefined },
+        );
+    });
+});
 
 describe('modelLists trailing-slash handling', () => {
     beforeEach(() => mockedGetJson.mockReset());

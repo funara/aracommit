@@ -30,7 +30,7 @@ export function renderProviderPick(state: ViewState): HTMLElement {
         dot: state.hasApiKey[p],
     }));
     options.sort((a, b) => a.label.localeCompare(b.label));
-    return el('section', { class: 'provider-pick' }, [
+    return el('div', { class: 'provider-pick' }, [
         fieldLabel(L.provider),
         makeSelect(
             'provider',
@@ -69,6 +69,25 @@ function appendEndpointConfig(body: HTMLElement, state: ViewState, p: Provider):
 
 }
 
+function makeRefreshIcon(): SVGSVGElement {
+    const namespace = 'http://www.w3.org/2000/svg';
+    const icon = document.createElementNS(namespace, 'svg');
+    icon.setAttribute('viewBox', '0 0 24 24');
+    icon.setAttribute('width', '16');
+    icon.setAttribute('height', '16');
+    icon.setAttribute('aria-hidden', 'true');
+    icon.setAttribute('focusable', 'false');
+    const path = document.createElementNS(namespace, 'path');
+    path.setAttribute('d', 'M3 12a9 9 0 0 1 15.36-6.36L21 8M21 3v5h-5M21 12a9 9 0 0 1-15.36 6.36L3 16M8 16H3v5');
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', 'currentColor');
+    path.setAttribute('stroke-width', '2');
+    path.setAttribute('stroke-linecap', 'round');
+    path.setAttribute('stroke-linejoin', 'round');
+    icon.appendChild(path);
+    return icon;
+}
+
 function appendModelPicker(body: HTMLElement, state: ViewState, p: Provider): void {
     const slot = state.models[p];
     body.appendChild(fieldLabel(L.model));
@@ -101,20 +120,22 @@ function appendModelPicker(body: HTMLElement, state: ViewState, p: Provider): vo
     if (NO_REFRESH_PROVIDERS.has(p)) {
         body.appendChild(modelCombobox);
     } else {
+        const refreshLabel = slot.loading ? L.refreshing : L.refresh;
+        const buttonLabel = p === 'custom' && !slot.loading ? L.fetchModels : refreshLabel;
         const refreshBtn = el('button', {
             id: 'refresh-models',
             type: 'button',
-            title: slot.loading ? L.refreshing : L.refresh,
+            title: buttonLabel,
             disabled: slot.loading,
-        }, [slot.loading ? L.refreshing : L.refresh]) as HTMLButtonElement;
-        refreshBtn.setAttribute('aria-label', slot.loading ? L.refreshing : L.refresh);
+        }, [makeRefreshIcon()]) as HTMLButtonElement;
+        refreshBtn.setAttribute('aria-label', buttonLabel);
+        refreshBtn.setAttribute('aria-busy', String(slot.loading));
         refreshBtn.addEventListener('click', () => send({ type: 'refreshModels', provider: p }));
         body.appendChild(el('div', { class: 'row' }, [modelCombobox, refreshBtn]));
     }
 
     if (modelPinned) { body.appendChild(pinnedHint()); }
 
-    body.appendChild(el('div', { class: 'hint' }, [`${L.liveFrom} ${L.liveSource[p]}`]));
     if (p === 'openrouter') {
         body.appendChild(makeCheckbox(
             'openrouter-prefer-free',
@@ -152,7 +173,10 @@ function appendAuthControls(body: HTMLElement, state: ViewState, p: Provider): v
         ));
     }
 
-    body.appendChild(fieldLabel(label));
+    body.appendChild(el('div', { class: 'credential-heading' }, [
+        fieldLabel(label),
+        state.hasApiKey[p] ? el('span', { class: 'credential-saved' }, [L.keySet]) : undefined,
+    ]));
     body.appendChild(renderApiKeyButtons(state, p, enabled));
 }
 
@@ -160,30 +184,24 @@ export function renderModelAuthSection(state: ViewState): HTMLElement {
     const p = state.provider;
     const body = el('div');
 
+    body.appendChild(renderProviderPick(state));
     appendEndpointConfig(body, state, p);
-    appendAuthControls(body, state, p);
     appendModelPicker(body, state, p);
+    appendAuthControls(body, state, p);
 
     return section('modelAuth', L.modelAuth, true, body);
 }
 
 function renderApiKeyButtons(state: ViewState, p: Provider, enabled: boolean): HTMLDivElement {
     const saved = state.hasApiKey[p];
-    let status: string;
-    let statusClass: string;
-    if (!enabled) {
-        status = L.authDisabled;
-        statusClass = 'disabled';
-    } else if (saved) {
-        status = L.keySet;
-        statusClass = 'saved';
-    } else {
-        status = L.keyRequired;
-        statusClass = 'needed';
+    let statusRow: HTMLDivElement | undefined;
+    if (!enabled || !saved) {
+        const status = enabled ? L.keyRequired : L.authDisabled;
+        const statusClass = enabled ? 'needed' : 'disabled';
+        const dot = el('span', { class: 'credential-dot' });
+        dot.setAttribute('aria-hidden', 'true');
+        statusRow = el('div', { class: `credential-status ${statusClass}`, role: 'status' }, [dot, status]);
     }
-    const dot = el('span', { class: 'credential-dot' });
-    dot.setAttribute('aria-hidden', 'true');
-    const statusRow = el('div', { class: `credential-status ${statusClass}`, role: 'status' }, [dot, status]);
     const actions = el('div', { class: 'actions auth-actions' });
 
     if (enabled || saved) {
@@ -249,12 +267,14 @@ export function renderCommitSection(state: ViewState): HTMLElement {
         ));
     }
 
-    body.appendChild(makeCheckbox(
+    const customInstructionsToggle = makeCheckbox(
         'use-custom-instructions',
         L.enableCustom,
         state.commit.useCustomInstructions,
         v => setSetting(KEYS.useCustomInstructions, v),
-    ));
+    );
+    customInstructionsToggle.classList.add('custom-instructions-toggle');
+    body.appendChild(customInstructionsToggle);
     if (state.commit.useCustomInstructions) {
         body.appendChild(fieldLabel(L.customInstructions));
         body.appendChild(makeTextarea(

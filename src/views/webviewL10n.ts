@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
-import { PROVIDER_LABELS, PROVIDER_LIVE_SOURCES } from '../services/providerRegistry';
+import { PROVIDER_LABELS } from '../services/providerRegistry';
 import { WebviewL10n } from './webview/protocol';
 
 /**
  * Builds the localized + branded string bundle handed to the webview at render
- * time. Provider display names and live-source labels come from the registry.
+ * time. Provider display names come from the registry.
  */
 export function buildWebviewL10n(): WebviewL10n {
     return {
@@ -14,28 +14,28 @@ export function buildWebviewL10n(): WebviewL10n {
         modelPlaceholder: vscode.l10n.t('Type a model ID'),
         refresh: vscode.l10n.t('Refresh'),
         refreshing: vscode.l10n.t('Refreshing…'),
+        fetchModels: vscode.l10n.t('Fetch models'),
         baseUrl: vscode.l10n.t('Base URL'),
         path: vscode.l10n.t('Path'),
-        apiKey: vscode.l10n.t('API key'),
+        apiKey: vscode.l10n.t('API Keys'),
         authToken: vscode.l10n.t('Auth token'),
         setKey: vscode.l10n.t('Set key'),
         removeKey: vscode.l10n.t('Remove'),
         getKey: vscode.l10n.t('Get key'),
         loginOpenRouter: vscode.l10n.t('Sign in with OpenRouter'),
-        keySet: vscode.l10n.t('Credential saved'),
+        keySet: vscode.l10n.t('(saved)'),
         keyRequired: vscode.l10n.t('Credential required for generation'),
         authDisabled: vscode.l10n.t('Authentication disabled'),
         credentialsSecurelyStored: vscode.l10n.t('Credentials are stored in VS Code SecretStorage.'),
         useAuthToken: vscode.l10n.t('Use auth token'),
         useApiKey: vscode.l10n.t('Send API key'),
         preferFreeModels: vscode.l10n.t('Show free models only'),
-        liveFrom: vscode.l10n.t('Model list source:'),
         notInList: vscode.l10n.t('(not in the current list)'),
         commit: vscode.l10n.t('Commit message'),
         format: vscode.l10n.t('Format'),
         formatLabels: {
             conventional: vscode.l10n.t('Conventional'),
-            emojiKarma: vscode.l10n.t('Gitmoji Conventional'),
+            emojiKarma: vscode.l10n.t('Conventional with Gitmoji'),
         },
         language: vscode.l10n.t('Language'),
         languageLabels: {
@@ -84,6 +84,5 @@ export function buildWebviewL10n(): WebviewL10n {
         ollamaNumCtxHint: vscode.l10n.t('Ollama context length. 0 = use model default. Larger values use more RAM/VRAM.'),
         autoOption: vscode.l10n.t('auto — try all available models'),
         providerLabels: PROVIDER_LABELS,
-        liveSource: PROVIDER_LIVE_SOURCES,
     };
 }

@@ -19,7 +19,7 @@ export async function fetchGeminiModels(
 }
 
 interface OpenAIModelsResponse {
-    data?: Array<{ id?: string }>;
+    data?: Array<{ id?: unknown } | null>;
 }
 
 /**
@@ -28,22 +28,31 @@ interface OpenAIModelsResponse {
  */
 async function fetchOpenAICompatModels(
     url: string,
-    apiKey: string,
+    apiKey?: string,
     signal?: AbortSignal,
 ): Promise<string[]> {
     const data = await HttpUtils.getJson<OpenAIModelsResponse>(url, {
-        headers: { Authorization: `Bearer ${apiKey}` },
+        headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {},
         signal,
     });
 
     const ids = (data.data ?? [])
-        .map(m => m.id ?? '')
-        .filter(id => id !== '');
+        .map(m => m?.id)
+        .filter((id): id is string => typeof id === 'string' && id !== '');
 
     return [...new Set(ids)].sort((a, b) => a.localeCompare(b));
 }
 
 const OPENAI_CHAT_PREFIXES = ['gpt-', 'chatgpt-', 'o1', 'o3', 'o4'];
+
+export async function fetchCustomModels(
+    baseUrl: string,
+    apiKey?: string,
+    signal?: AbortSignal,
+): Promise<string[]> {
+    const trimmed = HttpUtils.stripTrailingSlashes(baseUrl);
+    return fetchOpenAICompatModels(`${trimmed}/models`, apiKey, signal);
+}
 
 export async function fetchOpenAIModels(
     apiKey: string,
@@ -57,8 +66,10 @@ export async function fetchOpenAIModels(
     });
 
     const ids = (data.data ?? [])
-        .map(m => m.id ?? '')
-        .filter(id => id && OPENAI_CHAT_PREFIXES.some(p => id.startsWith(p)));
+        .map(m => m?.id)
+        .filter((id): id is string =>
+            typeof id === 'string' && id !== '' && OPENAI_CHAT_PREFIXES.some(p => id.startsWith(p)),
+        );
 
     // Heuristic newest-first ordering: longer suffix usually means newer
     // (`gpt-4o-2024-08-06` > `gpt-4o`), then lexicographic as a tiebreaker.
