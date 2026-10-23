@@ -1,0 +1,600 @@
+{
+  "name": "aracommit",
+  "displayName": "ARACommit",
+  "description": "ARACommit generates commit messages from staged Git changes using AI providers. Created by Funara, part of the ARA AI Ecosystem.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "publisher": "funara",
+  "author": "Funara (ARA AI Ecosystem)",
+  "engines": {
+    "vscode": "^1.93.0"
+  },
+  "extensionKind": [
+    "workspace"
+  ],
+  "activationEvents": [
+    "onCommand:aracommit.generateCommitMessage",
+    "onUri"
+  ],
+  "categories": [
+    "Machine Learning",
+    "Programming Languages",
+    "AI"
+  ],
+  "keywords": [
+    "Machine Learning",
+    "Programming Languages",
+    "AI Assistant",
+    "AI",
+    "AutoCommit",
+    "LLM",
+    "Git",
+    "Ollama"
+  ],
+  "icon": "assets/icons/icon.png",
+  "main": "./dist/extension.js",
+  "l10n": "./assets/l10n",
+  "capabilities": {
+    "virtualWorkspaces": {
+      "supported": false,
+      "description": "ARACommit requires a local git repository to read diffs and create commits."
+    },
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "ARACommit generates commit messages from diffs in any workspace, but auto-commit and auto-push are disabled in untrusted workspaces.",
+      "restrictedConfigurations": [
+        "aracommit.commit.autoCommit",
+        "aracommit.commit.autoPush"
+      ]
+    }
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "aracommit.generateCommitMessage",
+        "title": "%command.generateCommitMessage.title%",
+        "category": "%command.category%",
+        "icon": {
+          "light": "./assets/icons/button-light.svg",
+          "dark": "./assets/icons/button-dark.svg"
+        }
+      },
+      {
+        "command": "aracommit.setApiKey",
+        "title": "%command.setApiKey.title%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "aracommit.setOpenAIApiKey",
+        "title": "%command.setOpenAIApiKey.title%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "aracommit.removeApiKey",
+        "title": "%command.removeApiKey.title%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "aracommit.removeOpenAIApiKey",
+        "title": "%command.removeOpenAIApiKey.title%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "aracommit.setOllamaAuthToken",
+        "title": "%command.setOllamaAuthToken.title%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "aracommit.removeOllamaAuthToken",
+        "title": "%command.removeOllamaAuthToken.title%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "aracommit.setOpenRouterApiKey",
+        "title": "%command.setOpenRouterApiKey.title%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "aracommit.removeOpenRouterApiKey",
+        "title": "%command.removeOpenRouterApiKey.title%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "aracommit.loginOpenRouter",
+        "title": "%command.loginOpenRouter.title%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "aracommit.setAnthropicApiKey",
+        "title": "%command.setAnthropicApiKey.title%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "aracommit.removeAnthropicApiKey",
+        "title": "%command.removeAnthropicApiKey.title%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "aracommit.setDeepSeekApiKey",
+        "title": "%command.setDeepSeekApiKey.title%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "aracommit.removeDeepSeekApiKey",
+        "title": "%command.removeDeepSeekApiKey.title%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "aracommit.setXaiApiKey",
+        "title": "%command.setXaiApiKey.title%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "aracommit.removeXaiApiKey",
+        "title": "%command.removeXaiApiKey.title%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "aracommit.setCustomApiKey",
+        "title": "%command.setCustomApiKey.title%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "aracommit.removeCustomApiKey",
+        "title": "%command.removeCustomApiKey.title%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "aracommit.createProjectConfig",
+        "title": "%command.createProjectConfig.title%",
+        "category": "%command.category%"
+      },
+      {
+        "command": "aracommit.selectGeminiModel",
+        "title": "%command.selectGeminiModel.title%",
+        "category": "%command.category%"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "aracommit",
+          "title": "ARACommit",
+          "icon": "assets/icons/sidebar.svg"
+        }
+      ]
+    },
+    "views": {
+      "aracommit": [
+        {
+          "type": "webview",
+          "id": "aracommit.settings",
+          "name": "%view.settings.title%"
+        }
+      ]
+    },
+    "menus": {
+      "scm/title": [
+        {
+          "when": "scmProvider == git",
+          "command": "aracommit.generateCommitMessage",
+          "group": "navigation",
+          "arguments": [
+            "$scmProvider"
+          ]
+        },
+        {
+          "when": "scmProvider == git",
+          "command": "aracommit.createProjectConfig",
+          "group": "1_config@1"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "aracommit.generateCommitMessage",
+          "when": "workspaceFolderCount != 0"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "aracommit.generateCommitMessage",
+        "key": "ctrl+g",
+        "mac": "cmd+g",
+        "when": "scmProvider == git"
+      }
+    ],
+    "walkthroughs": [
+      {
+        "id": "aracommit.gettingStarted",
+        "title": "%walkthrough.title%",
+        "description": "%walkthrough.description%",
+        "steps": [
+          {
+            "id": "pickProvider",
+            "title": "%walkthrough.step.pickProvider.title%",
+            "description": "%walkthrough.step.pickProvider.description%",
+            "media": {
+              "markdown": "docs/walkthroughs/pick-provider.md"
+            },
+            "completionEvents": [
+              "onSettingChanged:aracommit.provider.type"
+            ]
+          },
+          {
+            "id": "setApiKey",
+            "title": "%walkthrough.step.setApiKey.title%",
+            "description": "%walkthrough.step.setApiKey.description%",
+            "media": {
+              "markdown": "docs/walkthroughs/set-api-key.md"
+            },
+            "completionEvents": [
+              "onCommand:aracommit.setApiKey",
+              "onCommand:aracommit.setOpenAIApiKey",
+              "onCommand:aracommit.setOllamaAuthToken",
+              "onCommand:aracommit.setOpenRouterApiKey",
+              "onCommand:aracommit.setAnthropicApiKey",
+              "onCommand:aracommit.setDeepSeekApiKey",
+              "onCommand:aracommit.setXaiApiKey",
+              "onCommand:aracommit.setCustomApiKey"
+            ]
+          },
+          {
+            "id": "generate",
+            "title": "%walkthrough.step.generate.title%",
+            "description": "%walkthrough.step.generate.description%",
+            "media": {
+              "markdown": "docs/walkthroughs/generate.md"
+            },
+            "completionEvents": [
+              "onCommand:aracommit.generateCommitMessage"
+            ]
+          }
+        ]
+      }
+    ],
+    "configuration": {
+      "title": "ARACommit",
+      "properties": {
+        "aracommit.provider.type": {
+          "type": "string",
+          "enum": [
+            "anthropic",
+            "custom",
+            "deepseek",
+            "gemini",
+            "ollama",
+            "openai",
+            "openrouter",
+            "xai"
+          ],
+          "enumDescriptions": [
+            "Anthropic Claude",
+            "Custom OpenAI-compatible endpoint (LM Studio, vLLM, llama.cpp, Together, Fireworks, etc.)",
+            "DeepSeek (works without VPN in restricted regions)",
+            "Google Gemini",
+            "Ollama (local, self-hosted)",
+            "OpenAI GPT models",
+            "OpenRouter (300+ models via single API key, includes free models)",
+            "xAI Grok"
+          ],
+          "default": "openrouter",
+          "description": "Select the AI provider for commit message generation",
+          "order": 1
+        },
+        "aracommit.commit.commitLanguage": {
+          "type": "string",
+          "enum": [
+            "english",
+            "indonesian",
+            "russian",
+            "chinese",
+            "japanese",
+            "korean",
+            "german",
+            "french",
+            "spanish",
+            "portuguese",
+            "custom"
+          ],
+          "enumDescriptions": [
+            "English",
+            "Indonesian",
+            "Russian",
+            "Chinese",
+            "Japanese",
+            "Korean",
+            "German",
+            "French",
+            "Spanish",
+            "Portuguese",
+            "Custom language — specify the language name in the 'Custom Language Name' setting below"
+          ],
+          "default": "english",
+          "markdownDescription": "Language for generated commit messages. Some commit formats may have limited support for non-English languages — pick `custom` and set `#aracommit.commit.customLanguageName#` for any language not listed.",
+          "order": 2
+        },
+        "aracommit.commit.customLanguageName": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Language name to use when `custom` is selected as the commit language (e.g. *Ukrainian*, *Italian*, *Arabic*). The format template will be translated via LLM and cached in `.aracommit/translations.json`.",
+          "order": 3
+        },
+        "aracommit.commit.commitFormat": {
+          "type": "string",
+          "enum": [
+            "conventional",
+            "emojiKarma"
+          ],
+          "enumDescriptions": [
+            "type(scope): description\n\nbody\n\nfooter",
+            ":emoji: type(scope): description"
+          ],
+          "enumItemLabels": [
+            "Conventional",
+            "Gitmoji Conventional"
+          ],
+          "default": "conventional",
+          "markdownDescription": "Format style for generated commit messages. Choose Conventional or Gitmoji Conventional.",
+          "order": 4
+        },
+        "aracommit.commit.useCustomInstructions": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Use custom instructions for commit message generation. **When enabled, `#aracommit.commit.customInstructions#` must not be empty.**",
+          "order": 5
+        },
+        "aracommit.commit.customInstructions": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Custom instructions for commit message generation. Required when `#aracommit.commit.useCustomInstructions#` is enabled.",
+          "editPresentation": "multilineText",
+          "order": 6
+        },
+        "aracommit.commit.commitlint.enabled": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Validate the generated message against the selected Conventional or Gitmoji Conventional format, auto-fix mechanical violations and retry with the LLM when needed (up to `#aracommit.commit.commitlint.maxRetries#` times).",
+          "order": 9
+        },
+        "aracommit.commit.commitlint.maxRetries": {
+          "type": "number",
+          "default": 3,
+          "minimum": 1,
+          "maximum": 10,
+          "markdownDescription": "Maximum number of validation+refinement cycles when `#aracommit.commit.commitlint.enabled#` is on.",
+          "order": 10
+        },
+        "aracommit.commit.commitlint.rulesPath": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Custom path to the commitlint rules file (e.g. `./config/commitlint.config.js`). Used by the Conventional format. Leave empty to auto-discover `commitlint.config.{js,cjs,json,yml,yaml}` in the repository root.",
+          "order": 11
+        },
+        "aracommit.commit.commitlint.engine": {
+          "type": "string",
+          "enum": [
+            "builtin",
+            "project"
+          ],
+          "enumDescriptions": [
+            "The bundled static validator with per-format rule sets (no project code is executed).",
+            "The repo's own commitlint CLI from node_modules — exact parity with CI (presets, extends chains, plugins). Falls back to builtin when unavailable. Applies to Conventional format only."
+          ],
+          "default": "builtin",
+          "markdownDescription": "Which engine validates generated messages when `#aracommit.commit.commitlint.enabled#` is on.",
+          "order": 12
+        },
+        "aracommit.commit.autoCommit": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Automatically commit the staged changes after generating the message.",
+          "order": 8
+        },
+        "aracommit.commit.autoPush": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Automatically push changes after committing. **Requires `#aracommit.commit.autoCommit#` to be enabled — ignored otherwise.**",
+          "order": 9
+        },
+        "aracommit.gemini.model": {
+          "type": "string",
+          "default": "auto",
+          "markdownDescription": "Gemini model for commit message generation. The canonical UI is the [ARACommit sidebar](command:aracommit.settings.focus): it fetches Google's live model list and updates this setting on selection. Use `auto` to try all available models and prefer the best quality. Only used when Gemini provider is selected.",
+          "order": 11
+        },
+        "aracommit.openai.model": {
+          "type": "string",
+          "default": "gpt-3.5-turbo",
+          "markdownDescription": "OpenAI model for commit message generation. The canonical UI is the [ARACommit sidebar](command:aracommit.settings.focus) — it fetches OpenAI's live model list (filtered to chat-capable families) and updates this setting on selection. Only used when OpenAI provider is selected.",
+          "order": 13
+        },
+        "aracommit.openai.baseUrl": {
+          "type": "string",
+          "default": "https://api.openai.com/v1",
+          "markdownDescription": "Base URL for OpenAI API. Change only if using Azure OpenAI or a custom endpoint. Default: <https://api.openai.com/v1>",
+          "order": 14
+        },
+        "aracommit.ollama.baseUrl": {
+          "type": "string",
+          "default": "http://localhost:11434",
+          "markdownDescription": "Base URL for Ollama API. Only used when Ollama provider is selected. Default: <http://localhost:11434>",
+          "order": 15
+        },
+        "aracommit.ollama.model": {
+          "type": "string",
+          "default": "llama3.2",
+          "markdownDescription": "Ollama model name. The canonical UI is the [ARACommit sidebar](command:aracommit.settings.focus) — it fetches the live list from `/api/tags`. Make sure the model is installed locally. Only used when Ollama provider is selected.",
+          "order": 16
+        },
+        "aracommit.ollama.useAuthToken": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable authentication token for Ollama API. Enable this if your Ollama instance requires an auth token",
+          "order": 17
+        },
+        "aracommit.ollama.numCtx": {
+          "type": "number",
+          "default": 0,
+          "markdownDescription": "Context window length passed to Ollama as `options.num_ctx`. **`0` (default) leaves the per-model Ollama default in place** — set explicitly only if your model's default is too small for your diffs (e.g. `8192`, `16384`, `32768`). Larger values use more RAM/VRAM.",
+          "order": 17
+        },
+        "aracommit.openrouter.model": {
+          "type": "string",
+          "default": "meta-llama/llama-3.3-70b-instruct:free",
+          "markdownDescription": "OpenRouter model ID (e.g. `meta-llama/llama-3.3-70b-instruct:free`, `anthropic/claude-haiku-4-5`, `deepseek/deepseek-chat`). The canonical UI is the [ARACommit sidebar](command:aracommit.settings.focus) — it fetches OpenRouter's live model list. Only used when OpenRouter provider is selected.",
+          "order": 30
+        },
+        "aracommit.openrouter.preferFreeModels": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Filter the OpenRouter model picker to free models only (models with `:free` suffix or zero pricing). Default: show all 300+ models (free + paid). Enable to narrow the picker to free-tier only.",
+          "order": 31
+        },
+        "aracommit.anthropic.model": {
+          "type": "string",
+          "default": "claude-sonnet-4-5-20250929",
+          "markdownDescription": "Anthropic model ID (e.g. `claude-sonnet-4-5-20250929`, `claude-haiku-4-5-20251001`, `claude-opus-4-1-20250805`). See <https://docs.anthropic.com/en/docs/about-claude/models> for the current list. Only used when Anthropic provider is selected.",
+          "order": 33
+        },
+        "aracommit.deepseek.model": {
+          "type": "string",
+          "default": "deepseek-chat",
+          "markdownDescription": "DeepSeek model ID (e.g. `deepseek-chat`, `deepseek-reasoner`). The canonical UI is the [ARACommit sidebar](command:aracommit.settings.focus) — it fetches DeepSeek's live model list. Only used when DeepSeek provider is selected.",
+          "order": 34
+        },
+        "aracommit.xai.model": {
+          "type": "string",
+          "default": "grok-3-mini",
+          "markdownDescription": "xAI Grok model ID (e.g. `grok-3-mini`, `grok-3`, `grok-4-fast`, `grok-4-1-fast`, `grok-code-fast-1`). The canonical UI is the [ARACommit sidebar](command:aracommit.settings.focus) — it falls back to a static list if `/v1/models` is blocked (e.g. on fresh xAI accounts without credits). Only used when xAI provider is selected.",
+          "order": 35
+        },
+        "aracommit.custom.baseUrl": {
+          "type": "string",
+          "default": "http://localhost:1234/v1",
+          "markdownDescription": "Base URL of any OpenAI-compatible `chat/completions` endpoint. Examples: `http://localhost:1234/v1` (LM Studio), `http://localhost:8000/v1` (vLLM), `http://localhost:8080/v1` (llama.cpp server), `http://localhost:8080/v1` (LocalAI), `https://api.together.xyz/v1` (Together AI), `https://api.fireworks.ai/inference/v1` (Fireworks). Only used when Custom provider is selected.",
+          "order": 36
+        },
+        "aracommit.custom.model": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Model ID to send to the Custom endpoint. Free-form — depends on what your self-hosted server exposes (e.g. `qwen2.5-coder:7b`, `meta-llama/Llama-3.3-70B-Instruct-Turbo`). Only used when Custom provider is selected.",
+          "order": 37
+        },
+        "aracommit.custom.useApiKey": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Send an API key to the Custom endpoint. Disable for self-hosted servers that don't require auth (LM Studio, llama.cpp server default). When enabled, set the key via the `ARACommit: Set Custom API Key` command.",
+          "order": 38
+        },
+        "aracommit.custom.chatCompletionsPath": {
+          "type": "string",
+          "default": "/chat/completions",
+          "markdownDescription": "Path appended to `#aracommit.custom.baseUrl#` for chat completion requests. Default is `/chat/completions` — change only if your server uses a non-standard path.",
+          "order": 39
+        },
+        "aracommit.general.temperature": {
+          "type": "number",
+          "default": 0.7,
+          "minimum": 0,
+          "maximum": 2,
+          "markdownDescription": "LLM sampling temperature applied to all providers. Lower (e.g. `0.2`) = more deterministic / repeatable commit messages; higher (e.g. `1.0`) = more varied wording. Range `[0, 2]`. For Ollama it's threaded into `options.temperature`; for Gemini into `generationConfig.temperature`; for OpenAI-compatible providers (OpenAI/OpenRouter/DeepSeek/xAI/Custom) and Anthropic — into the top-level `temperature` field.",
+          "order": 18
+        },
+        "aracommit.general.maxDiffSize": {
+          "type": "number",
+          "default": 100000,
+          "markdownDescription": "Maximum diff size in characters sent to the LLM. Larger diffs are truncated with a `...(truncated)` marker. **Set to `-1` to disable truncation (sends the entire diff — only safe with long-context models).** Clamped to the range `[1000, 1000000]`.\n\n**Tighten this for low-TPM free tiers:**\n- **OpenRouter free (20 RPM / 50 RPD)** — `40000` typically fine.\n- **Gemini / Anthropic / DeepSeek paid** — default `100000` is fine.\n\nRule of thumb: 1 token ≈ 4 chars, so `100000` chars ≈ 25000 tokens.",
+          "order": 19
+        },
+        "aracommit.apiRequestTimeout": {
+          "type": "number",
+          "default": 30,
+          "markdownDescription": "Timeout for LLM provider HTTP requests in seconds. **Set to `-1` for no timeout (infinite wait).**",
+          "order": 20
+        },
+        "aracommit.gitTimeout": {
+          "type": "number",
+          "default": 120,
+          "markdownDescription": "Timeout for `git` subprocesses (diff, blame, push, etc.) in seconds. Push over a slow remote or diff over a huge file may need more than the default. **Set to `-1` for no timeout.**",
+          "order": 21
+        },
+        "aracommit.general.maxOutputTokens": {
+          "type": "number",
+          "default": 4096,
+          "minimum": 1,
+          "markdownDescription": "Maximum number of tokens the model may generate for one commit message, applied to every provider (Gemini `generationConfig.maxOutputTokens`, Anthropic/OpenAI-compatible `max_tokens`, Ollama `options.num_predict`).\n\nA commit message is only ~40-60 tokens, so this is a runaway guard rather than a length limit. It must stay generous because **reasoning models bill their thinking against this same budget** — with too low a value the model spends the budget thinking and its answer is cut off mid-line. On truncation ARACommit retries with double the budget, up to `32768`.",
+          "order": 23
+        },
+        "aracommit.gemini.thinkingBudget": {
+          "type": "number",
+          "default": 0,
+          "minimum": -1,
+          "markdownDescription": "Thinking token budget for **Gemini 2.5** models. `0` disables thinking (fastest, cheapest, and plenty for commit messages), `-1` lets the model decide, any positive number caps it.\n\nIgnored for Gemini 3.x (use `#aracommit.gemini.thinkingLevel#`) and for models without thinking support (Gemini 2.0 and older, Gemma). **Gemini 2.5 Pro cannot disable thinking** — a `0` here is raised to its minimum of `128`.",
+          "order": 24
+        },
+        "aracommit.gemini.thinkingLevel": {
+          "type": "string",
+          "enum": [
+            "minimal",
+            "low",
+            "medium",
+            "high"
+          ],
+          "default": "low",
+          "markdownDescription": "Thinking depth for **Gemini 3.x** models, which cannot turn thinking off entirely. `low` is the default and is ample for commit messages; higher levels spend more tokens and time.\n\nIgnored for Gemini 2.5 and older (use `#aracommit.gemini.thinkingBudget#`) — those models reject this field with HTTP 400.",
+          "order": 25
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "node esbuild.js --production",
+    "vscode:prepublish:tsc": "tsc -p ./",
+    "compile": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "build:prod": "node esbuild.js --production",
+    "build:analyze": "node esbuild.js --production --analyze",
+    "package": "vsce package --no-dependencies --allow-missing-repository --no-rewrite-relative-links",
+    "package:notsc": "npm run vscode:prepublish:tsc && vsce package --no-dependencies --allow-missing-repository --no-rewrite-relative-links",
+    "package:analyze": "npm run build:analyze && vsce package --no-dependencies --allow-missing-repository --no-rewrite-relative-links",
+    "lint": "eslint \"src/**/*.ts\"",
+    "lint:fix": "eslint \"src/**/*.ts\" --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "vitest run",
+    "test:unit:coverage": "vitest run --coverage",
+    "test:unit:watch": "vitest",
+    "pretest:e2e": "tsc -p tests/e2e/tsconfig.e2e.json && npm run compile",
+    "test:e2e": "vscode-test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^26.6.3",
+    "@types/sinon": "^22.0.0",
+    "@types/vscode": "^1.93.0",
+    "@typescript-eslint/eslint-plugin": "^8.70.1",
+    "@typescript-eslint/parser": "^8.70.1",
+    "@vitest/coverage-v8": "^5.0.1",
+    "@vscode/test-cli": "^0.0.15",
+    "@vscode/test-electron": "^3.1.0",
+    "@vscode/vsce": "^4.0.0",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.11.0",
+    "eslint-import-resolver-typescript": "^4.4.5",
+    "eslint-plugin-import-x": "^4.17.1",
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "glob": "^13.0.6",
+    "happy-dom": "^20.14.5",
+    "mocha": "^12.0.2",
+    "sinon": "^22.1.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.70.1",
+    "vitest": "^5.0.2"
+  },
+  "overrides": {
+    "serialize-javascript": "^7.0.5",
+    "diff": "^8.0.3"
+  }
+}

@@ -1,0 +1,28 @@
+import * as vscode from 'vscode';
+import { registerGenerateCommitMessageCommand } from './generateCommitMessage';
+import { registerSetApiKeyCommands } from './setApiKeys';
+import { createProjectConfig } from './createProjectConfig';
+import { registerSelectGeminiModelCommand } from './selectGeminiModel';
+import { registerOpenRouterAuthCommands } from './openRouterAuth';
+import { Logger } from '../utils/logger';
+import { toError } from '../utils/errorUtils';
+
+export function registerCommands(context: vscode.ExtensionContext): void {
+    Logger.log('Registering commands and views');
+
+    try {
+        const disposables = [
+            registerGenerateCommitMessageCommand(context),
+            ...registerSetApiKeyCommands(context),
+            registerSelectGeminiModelCommand(context),
+            ...registerOpenRouterAuthCommands(context),
+            vscode.commands.registerCommand('aracommit.createProjectConfig', createProjectConfig)
+        ];
+
+        context.subscriptions.push(...disposables);
+    } catch (error) {
+        Logger.error('Failed to register commands:', toError(error));
+        void Logger.showError(vscode.l10n.t('Failed to register commands'));
+        throw error;
+    }
+}

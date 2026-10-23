@@ -1,0 +1,61 @@
+# Development files
+references/**
+.vitest/**
+vitest.config.ts
+.vscode/**
+.vscode-test/**
+.vscode-test.mjs
+src/**
+out/**
+test/**
+tests/**
+docs/**
+.claude/**
+.aracommit/**
+
+# Configuration files
+.gitignore
+esbuild.js
+tsconfig.json
+eslint.config.mjs
+
+# Environment and secrets
+.env
+.env.*
+
+# Build artifacts
+**/*.map
+**/*.ts
+*.vsix
+.DS_Store
+coverage
+*.log
+node_modules/**
+
+# Test files
+**/*.test.js
+**/*.spec.js
+**/*.test.ts
+**/*.spec.ts
+
+# Documentation (except essential)
+package-lock.json
+
+# Cache and temp files
+.nyc_output/
+*.tmp
+*.swp
+*.swo
+*~
+
+# Only keep essential files
+!README.md
+!LICENSE
+!assets/icons/icon.png
+!assets/icons/sidebar.svg
+!assets/icons/button-dark.svg
+!assets/icons/button-light.svg
+!dist/**
+!assets/l10n/**
+!package.nls*.json
+!docs/walkthroughs/** 

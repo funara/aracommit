@@ -1,0 +1,28 @@
+{
+    "compilerOptions": {
+        "module": "node16",
+        "moduleResolution": "node16",
+        "target": "ES2022",
+        "outDir": "dist",
+        "lib": [
+            "ES2022",
+            "DOM"
+        ],
+        "sourceMap": true,
+        "rootDir": "src",
+        "strict": true,
+        "esModuleInterop": true,
+        "types": [
+            "node",
+            "vscode"
+        ]
+    },
+    "include": ["src/**/*.ts"],
+    "exclude": [
+        "node_modules",
+        "references",
+        ".vscode-test",
+        "tests",
+        "vitest.config.ts"
+    ]
+}
