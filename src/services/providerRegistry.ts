@@ -26,7 +26,7 @@ export { PROVIDERS } from './providerCatalog';
  * iterates this table; everything else derives from the catalog.
  */
 export interface ProviderDef extends ProviderMeta {
-    /** Currently configured model id for this provider. */
+    /** Configured model id or fixed display label for this provider. */
     selectedModel(): string;
     /** Fetches the live model list, throwing if a required key is missing. */
     fetchModels(): Promise<string[]>;
@@ -92,6 +92,10 @@ const PROVIDER_BEHAVIOR: Record<Provider, Pick<ProviderDef, 'selectedModel' | 'f
             return fetchCustomModels(ConfigService.get('custom.baseUrl'), apiKey);
         },
     },
+    araAssistant: {
+        selectedModel: () => ConfigService.getModelFor('araAssistant'),
+        fetchModels: async () => [],
+    },
 };
 
 export const PROVIDER_DEFS: readonly ProviderDef[] = PROVIDER_CATALOG.map(meta => ({
@@ -117,7 +121,7 @@ export function providerDef(id: Provider): ProviderDef {
 }
 
 /** SecretStorage keys for all providers — used to react to key changes. */
-export const SECRET_KEYS: readonly string[] = PROVIDER_DEFS.map(d => d.secretKey);
+export const SECRET_KEYS: readonly string[] = PROVIDER_DEFS.flatMap(d => d.secretKey ? [d.secretKey] : []);
 
 /** `{ provider: url }` for providers that expose a "get a key" console link. */
 export const API_KEY_URLS: Partial<Record<Provider, string>> = Object.fromEntries(

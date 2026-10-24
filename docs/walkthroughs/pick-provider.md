@@ -1,7 +1,8 @@
 # Choose an AI provider
 
-ARACommit defaults to OpenRouter. Select a provider in the sidebar's **Model & Authentication** section, then choose a model where a list is available.
+ARACommit defaults to ARA Assistant. Select a provider in the sidebar's **Model & Authentication** section, then choose a model where a list is available.
 
+- **ARA Assistant** — automatic model routing; provider data policies vary.
 - **Anthropic** — Claude models; key required; curated model list.
 - **Custom** — any OpenAI-compatible endpoint; key optional.
 - **DeepSeek** — hosted API; key required.

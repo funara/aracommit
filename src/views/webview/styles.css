@@ -413,6 +413,15 @@ textarea:disabled {
     color: var(--vscode-foreground, #ccc);
     font-weight: 500;
 }
+.hint.info {
+    margin-top: 7px;
+    padding: 6px 9px;
+    border: 1px solid color-mix(in srgb, var(--vscode-editorInfo-foreground, var(--vscode-textLink-foreground, #3794ff)) 28%, transparent);
+    border-radius: var(--cs-radius);
+    background: color-mix(in srgb, var(--vscode-editorInfo-foreground, var(--vscode-textLink-foreground, #3794ff)) 9%, transparent);
+    color: var(--vscode-foreground, #ccc);
+    font-weight: 400;
+}
 .error {
     margin-top: 7px;
     padding: 6px 9px;
@@ -600,7 +609,7 @@ textarea:disabled {
 
 /* ── High-contrast themes: restore strong outlines ───────────────────── */
 @media (forced-colors: active) {
-    details, .badge, .hint.pinned, .error, .combo-list, .select-list { border: 1px solid CanvasText; }
+    details, .badge, .hint.pinned, .hint.info, .error, .combo-list, .select-list { border: 1px solid CanvasText; }
     select:focus, input:focus, textarea:focus, button:focus-visible,
     .select .select-trigger:focus-visible, .select.open .select-trigger {
         outline: 2px solid Highlight;

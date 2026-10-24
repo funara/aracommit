@@ -9,15 +9,20 @@ const { fetchModels, selectedModel } = vi.hoisted(() => ({
     selectedModel: vi.fn(),
 }));
 
-vi.mock('../src/services/providerRegistry', () => {
-    const providers = ['anthropic', 'custom', 'deepseek', 'gemini', 'ollama', 'openai', 'openrouter', 'xai'];
+vi.mock('../src/services/providerRegistry', async () => {
+    const { PROVIDER_CATALOG } = await vi.importActual<typeof import('../src/services/providerCatalog')>(
+        '../src/services/providerCatalog',
+    );
+    const providers = PROVIDER_CATALOG.map(meta => meta.id);
+    const metadataById = new Map(PROVIDER_CATALOG.map(meta => [meta.id, meta]));
     return {
         PROVIDERS: providers,
-        NO_REFRESH_PROVIDERS: new Set(['anthropic']),
-        SECRET_KEYS: [],
-        API_KEY_URLS: {},
-        PROVIDER_LABELS: Object.fromEntries(providers.map(id => [id, id])),
+        NO_REFRESH_PROVIDERS: PROVIDER_CATALOG.filter(meta => meta.noRefresh).map(meta => meta.id),
+        SECRET_KEYS: PROVIDER_CATALOG.flatMap(meta => meta.secretKey ? [meta.secretKey] : []),
+        API_KEY_URLS: Object.fromEntries(PROVIDER_CATALOG.filter(meta => meta.apiKeyUrl).map(meta => [meta.id, meta.apiKeyUrl])),
+        PROVIDER_LABELS: Object.fromEntries(PROVIDER_CATALOG.map(meta => [meta.id, meta.label])),
         providerDef: (provider: string) => ({
+            ...metadataById.get(provider as Provider),
             fetchModels: () => fetchModels(provider),
             selectedModel: () => selectedModel(provider),
         }),
@@ -79,6 +84,16 @@ afterEach(() => {
 });
 
 describe('SettingsWebviewProvider model refresh', () => {
+    it('ignores forged key-management messages for a keyless provider', async () => {
+        const provider = makeProvider();
+        const executeCommand = vi.spyOn(vscode.commands, 'executeCommand');
+
+        await provider.handleMessage({ type: 'setApiKey', provider: 'araAssistant' });
+        await provider.handleMessage({ type: 'removeApiKey', provider: 'araAssistant' });
+
+        expect(executeCommand).not.toHaveBeenCalled();
+    });
+
     it('keeps the latest forced request when earlier responses arrive late', async () => {
         const provider = makeProvider();
         const first = deferred<string[]>();

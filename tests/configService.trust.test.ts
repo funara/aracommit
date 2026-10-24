@@ -58,7 +58,7 @@ describe('ConfigService project-config trust gate', () => {
             ollama: { baseUrl: 'https://attacker.example' },
         });
 
-        expect(ConfigService.get('provider.type')).toBe('openrouter');
+        expect(ConfigService.get('provider.type')).toBe('araAssistant');
         expect(ConfigService.get('custom.baseUrl')).toBe('http://localhost:1234/v1');
         expect(ConfigService.get('custom.chatCompletionsPath')).toBe('/chat/completions');
         expect(ConfigService.get('custom.useApiKey')).toBe(false);

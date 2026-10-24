@@ -206,6 +206,13 @@ describe('ApiKeyManager.getOptionalKey', () => {
         expect(await ApiKeyManager.getOptionalKey('ollama')).toBe('tok');
     });
 
+    it('returns undefined without touching SecretStorage for ARA Assistant', async () => {
+        const secrets = makeSecretStorage();
+        installSecretStorage(secrets);
+        expect(await ApiKeyManager.getOptionalKey('araAssistant')).toBeUndefined();
+        expect(secrets.get).not.toHaveBeenCalled();
+    });
+
     it('returns undefined when not stored', async () => {
         const secrets = makeSecretStorage();
         installSecretStorage(secrets);

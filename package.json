@@ -1,8 +1,8 @@
 {
   "name": "aracommit",
   "displayName": "ARACommit",
-  "description": "ARACommit generates commit messages from staged Git changes using AI providers. Created by Funara, part of the ARA AI Ecosystem.",
-  "version": "0.1.0",
+  "description": "ARACommit helps generate conventional commit messages from staged Git changes using AI.",
+  "version": "0.2.0",
   "license": "MIT",
   "publisher": "funara",
   "author": "Funara (ARA AI Ecosystem)",
@@ -264,6 +264,7 @@
           "type": "string",
           "enum": [
             "anthropic",
+            "araAssistant",
             "custom",
             "deepseek",
             "gemini",
@@ -274,6 +275,7 @@
           ],
           "enumDescriptions": [
             "Anthropic Claude",
+            "ARA Assistant automatic free model routing (no API key required)",
             "Custom OpenAI-compatible endpoint (LM Studio, vLLM, llama.cpp, Together, Fireworks, etc.)",
             "DeepSeek (works without VPN in restricted regions)",
             "Google Gemini",
@@ -282,7 +284,7 @@
             "OpenRouter (300+ models via single API key, includes free models)",
             "xAI Grok"
           ],
-          "default": "openrouter",
+          "default": "araAssistant",
           "description": "Select the AI provider for commit message generation",
           "order": 1
         },
@@ -403,8 +405,8 @@
         },
         "aracommit.gemini.model": {
           "type": "string",
-          "default": "auto",
-          "markdownDescription": "Gemini model for commit message generation. The canonical UI is the [ARACommit sidebar](command:aracommit.settings.focus): it fetches Google's live model list and updates this setting on selection. Use `auto` to try all available models and prefer the best quality. Only used when Gemini provider is selected.",
+          "default": "gemini-3-8-flash",
+          "markdownDescription": "Gemini model for commit message generation. The default is `gemini-3-8-flash`; use `auto` to try all available models in quality order. The canonical UI is the [ARACommit sidebar](command:aracommit.settings.focus): it fetches Google's live model list and updates this setting on selection. Only used when Gemini provider is selected.",
           "order": 11
         },
         "aracommit.openai.model": {
@@ -457,20 +459,20 @@
         },
         "aracommit.anthropic.model": {
           "type": "string",
-          "default": "claude-sonnet-4-5-20250929",
-          "markdownDescription": "Anthropic model ID (e.g. `claude-sonnet-4-5-20250929`, `claude-haiku-4-5-20251001`, `claude-opus-4-1-20250805`). See <https://docs.anthropic.com/en/docs/about-claude/models> for the current list. Only used when Anthropic provider is selected.",
+          "default": "claude-sonnet-5-5",
+          "markdownDescription": "Anthropic model ID (e.g. `claude-sonnet-5-5`, `claude-haiku-4-5-20251001`, `claude-opus-4-1-20250805`). See <https://docs.anthropic.com/en/docs/about-claude/models> for the current list. Only used when Anthropic provider is selected.",
           "order": 33
         },
         "aracommit.deepseek.model": {
           "type": "string",
-          "default": "deepseek-chat",
-          "markdownDescription": "DeepSeek model ID (e.g. `deepseek-chat`, `deepseek-reasoner`). The canonical UI is the [ARACommit sidebar](command:aracommit.settings.focus) — it fetches DeepSeek's live model list. Only used when DeepSeek provider is selected.",
+          "default": "deepseek-v4-1-flash",
+          "markdownDescription": "DeepSeek model ID (e.g. `deepseek-v4-1-flash`, `deepseek-chat`, `deepseek-reasoner`). The canonical UI is the [ARACommit sidebar](command:aracommit.settings.focus) — it fetches DeepSeek's live model list. Only used when DeepSeek provider is selected.",
           "order": 34
         },
         "aracommit.xai.model": {
           "type": "string",
-          "default": "grok-3-mini",
-          "markdownDescription": "xAI Grok model ID (e.g. `grok-3-mini`, `grok-3`, `grok-4-fast`, `grok-4-1-fast`, `grok-code-fast-1`). The canonical UI is the [ARACommit sidebar](command:aracommit.settings.focus) — it falls back to a static list if `/v1/models` is blocked (e.g. on fresh xAI accounts without credits). Only used when xAI provider is selected.",
+          "default": "grok-4-7",
+          "markdownDescription": "xAI Grok model ID (e.g. `grok-4-7`, `grok-3-mini`, `grok-3`, `grok-4-fast`, `grok-4-1-fast`, `grok-code-fast-1`). The canonical UI is the [ARACommit sidebar](command:aracommit.settings.focus) — it falls back to a static list if `/v1/models` is blocked (e.g. on fresh xAI accounts without credits). Only used when xAI provider is selected.",
           "order": 35
         },
         "aracommit.custom.baseUrl": {
@@ -482,7 +484,7 @@
         "aracommit.custom.model": {
           "type": "string",
           "default": "",
-          "markdownDescription": "Model ID to send to the Custom endpoint. Free-form — depends on what your self-hosted server exposes (e.g. `qwen2.5-coder:7b`, `meta-llama/Llama-3.3-70B-Instruct-Turbo`). Only used when Custom provider is selected.",
+          "markdownDescription": "Model ID to send to the Custom endpoint. Only used when Custom provider is selected.",
           "order": 37
         },
         "aracommit.custom.useApiKey": {
@@ -559,9 +561,9 @@
     "watch": "node esbuild.js --watch",
     "build:prod": "node esbuild.js --production",
     "build:analyze": "node esbuild.js --production --analyze",
-    "package": "vsce package --no-dependencies",
-    "package:notsc": "npm run vscode:prepublish:tsc && vsce package --no-dependencies",
-    "package:analyze": "npm run build:analyze && vsce package --no-dependencies",
+    "package": "vsce package --no-dependencies --allow-package-env-file",
+    "package:notsc": "npm run vscode:prepublish:tsc && vsce package --no-dependencies --allow-package-env-file",
+    "package:analyze": "npm run build:analyze && vsce package --no-dependencies --allow-package-env-file",
     "lint": "eslint \"src/**/*.ts\"",
     "lint:fix": "eslint \"src/**/*.ts\" --fix",
     "typecheck": "tsc --noEmit",

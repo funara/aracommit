@@ -3,6 +3,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 interface ExtensionManifest {
+    scripts: Record<string, string>;
     icon: string;
     l10n: string;
     contributes: {
@@ -14,6 +15,25 @@ interface ExtensionManifest {
 
 const root = path.resolve(__dirname, '..');
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8')) as ExtensionManifest;
+
+it('keeps the root build config out of source control but includes it in the VSIX', () => {
+    const gitignore = fs.readFileSync(path.join(root, '.gitignore'), 'utf8');
+    const vscodeRules = fs.readFileSync(path.join(root, '.vscodeignore'), 'utf8')
+        .split(/\r?\n/)
+        .map(rule => rule.trim())
+        .filter(rule => rule && !rule.startsWith('#'));
+
+    expect(gitignore).toContain('.env');
+    expect(vscodeRules).toContain('.env.*');
+    expect(vscodeRules).toContain('!.env');
+    expect(vscodeRules).not.toContain('.env');
+});
+
+it('allows all VSIX scripts to package the root environment file', () => {
+    for (const script of ['package', 'package:notsc', 'package:analyze']) {
+        expect(manifest.scripts[script]).toContain('--allow-package-env-file');
+    }
+});
 
 it('keeps packaged icons, localization, and walkthrough media paths valid', () => {
     const resources = [

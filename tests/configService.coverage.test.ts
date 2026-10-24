@@ -31,7 +31,7 @@ describe('ConfigService.get / getConfig layering', () => {
     it('returns the SETTING_DEFAULTS default when nothing overrides it', () => {
         expect(ConfigService.get('commit.autoCommit')).toBe(false);
         expect(ConfigService.get('gitTimeout')).toBe(120);
-        expect(ConfigService.get('provider.type')).toBe('openrouter');
+        expect(ConfigService.get('provider.type')).toBe('araAssistant');
     });
 
     it('caches the resolved value (second read does not re-inspect)', () => {
@@ -109,23 +109,23 @@ describe('ConfigService.getProvider', () => {
         expect(ConfigService.getProvider()).toBe('openai');
     });
 
-    it('falls back to OpenRouter for an unknown provider', () => {
+    it('falls back to the default provider for an unknown provider', () => {
         (ConfigService as unknown as { projectConfigCache: unknown }).projectConfigCache = {
             provider: { type: 'totally-made-up' },
         };
-        expect(ConfigService.getProvider()).toBe('openrouter');
+        expect(ConfigService.getProvider()).toBe('araAssistant');
     });
 });
 
 describe('ConfigService.getModel', () => {
     const cases: Array<[string, string, string]> = [
-        ['anthropic', 'anthropic.model', 'claude-sonnet-4-5-20250929'],
-        ['gemini', 'gemini.model', 'auto'],
+        ['anthropic', 'anthropic.model', 'claude-sonnet-5-5'],
+        ['gemini', 'gemini.model', 'gemini-3-8-flash'],
         ['ollama', 'ollama.model', 'llama3.2'],
         ['openai', 'openai.model', 'gpt-3.5-turbo'],
         ['openrouter', 'openrouter.model', 'meta-llama/llama-3.3-70b-instruct:free'],
-        ['deepseek', 'deepseek.model', 'deepseek-chat'],
-        ['xai', 'xai.model', 'grok-3-mini'],
+        ['deepseek', 'deepseek.model', 'deepseek-v4-1-flash'],
+        ['xai', 'xai.model', 'grok-4-7'],
         ['custom', 'custom.model', ''],
     ];
 

@@ -7,12 +7,14 @@ describe('buildWebviewL10n', () => {
         const bundle = buildWebviewL10n();
         expect(bundle.provider).toBe('Provider');
         expect(bundle.model).toBe('Model');
+        expect(bundle.providerNotice).toBe('Provider Notice');
         expect(bundle.formatLabels.emojiKarma).toBe('Conventional with Gitmoji');
         expect(bundle.apiKey).toBe('API Keys');
         expect(bundle.keySet).toBe('(saved)');
         expect(bundle.autoCommit).toBe('Auto-commit');
         expect(bundle.advanced).toBe('Advanced');
         expect(bundle.autoOption).toBe('auto — try all available models');
+        expect(bundle.araAssistantPrivacy).toBe('Notes: Provider may send changes and prompt context to third-party AI services. See provider privacy policy for details.');
     });
 
     it('exposes localized strings and string-valued label maps', () => {

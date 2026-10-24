@@ -19,7 +19,7 @@ type CacheValue = string | boolean | number;
  */
 /* eslint-disable @typescript-eslint/naming-convention */
 export const SETTING_DEFAULTS = {
-    'gemini.model': 'auto',
+    'gemini.model': 'gemini-3-8-flash',
     'commit.commitLanguage': 'english',
     'commit.customLanguageName': '',
     'commit.commitFormat': 'conventional',
@@ -27,7 +27,7 @@ export const SETTING_DEFAULTS = {
     'commit.customInstructions': '',
     'commit.autoCommit': false,
     'commit.autoPush': false,
-    'provider.type': 'openrouter',
+    'provider.type': 'araAssistant',
     'ollama.baseUrl': 'http://localhost:11434',
     'ollama.model': 'llama3.2',
     'ollama.useAuthToken': false,
@@ -35,9 +35,9 @@ export const SETTING_DEFAULTS = {
     'openai.baseUrl': 'https://api.openai.com/v1',
     'openrouter.model': 'meta-llama/llama-3.3-70b-instruct:free',
     'openrouter.preferFreeModels': false,
-    'anthropic.model': 'claude-sonnet-4-5-20250929',
-    'deepseek.model': 'deepseek-chat',
-    'xai.model': 'grok-3-mini',
+    'anthropic.model': 'claude-sonnet-5-5',
+    'deepseek.model': 'deepseek-v4-1-flash',
+    'xai.model': 'grok-4-7',
     'custom.baseUrl': 'http://localhost:1234/v1',
     'custom.model': '',
     'custom.useApiKey': false,
@@ -476,10 +476,11 @@ export class ConfigService {
   static getProvider(): string {
     const provider = this.get('provider.type');
     if (!isProvider(provider)) {
+      const defaultProvider = SETTING_DEFAULTS['provider.type'];
       Logger.warn(
-        `Invalid provider type: ${provider}, falling back to openrouter`,
+        `Invalid provider type: ${provider}, falling back to ${defaultProvider}`,
       );
-      return 'openrouter';
+      return defaultProvider;
     }
     return provider;
   }
@@ -497,13 +498,13 @@ export class ConfigService {
   }
 
   /**
-   * Configured model id for an arbitrary provider (`<provider>.model`). The
-   * model key is always `<provider>.model` and every provider id has such an
-   * entry in `SETTING_DEFAULTS`, so this derives the right key without a
-   * per-provider switch. Used by the shared OpenAI-compatible dispatcher and
-   * `getModel()` (active provider).
+   * Configured model for an arbitrary provider, or the fixed display label for
+   * one without a user-editable model setting.
    */
   static getModelFor(provider: string): string {
+    if (provider === 'araAssistant') {
+      return 'Automatic · Free';
+    }
     return this.get(`${provider}.model` as SettingKey) as string;
   }
 

@@ -13,6 +13,7 @@ import {
     renderCommitSection,
     renderSmartCommitSection,
     renderAdvancedSection,
+    renderProviderNoticeSection,
 } from './sections';
 
 const root = document.getElementById('root') as HTMLElement;
@@ -23,6 +24,10 @@ function build(state: ViewState): void {
     fragment.appendChild(renderCommitSection(state));
     fragment.appendChild(renderSmartCommitSection(state));
     fragment.appendChild(renderAdvancedSection(state));
+    const providerNotice = renderProviderNoticeSection(state);
+    if (providerNotice) {
+        fragment.appendChild(providerNotice);
+    }
     root.innerHTML = '';
     root.appendChild(fragment);
 }

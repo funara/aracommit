@@ -35,6 +35,11 @@ describe('Settings schema (F036 + general)', () => {
         }
     });
 
+    it('uses a fixed display label for the keyless ARA Assistant model', async () => {
+        const { ConfigService } = await import('../src/utils/configService');
+        expect(ConfigService.getModelFor('araAssistant')).toBe('Automatic · Free');
+    });
+
     it('ConfigService.knownConfigurationKeys matches the package.json schema (F053)', async () => {
         const { ConfigService } = await import('../src/utils/configService');
         const pkgKeys = Object.keys(pkg.contributes.configuration.properties);

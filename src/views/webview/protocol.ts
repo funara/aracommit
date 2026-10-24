@@ -13,7 +13,8 @@ export type Provider =
     | 'anthropic'
     | 'deepseek'
     | 'xai'
-    | 'custom';
+    | 'custom'
+    | 'araAssistant';
 
 export interface ModelSlot {
     list: string[];
@@ -25,6 +26,7 @@ export interface ModelSlot {
 export interface WebviewL10n {
     provider: string;
     modelAuth: string;
+    providerNotice: string;
     model: string;
     modelPlaceholder: string;
     refresh: string;
@@ -42,6 +44,7 @@ export interface WebviewL10n {
     keyRequired: string;
     authDisabled: string;
     credentialsSecurelyStored: string;
+    araAssistantPrivacy: string;
     useAuthToken: string;
     useApiKey: string;
     preferFreeModels: string;

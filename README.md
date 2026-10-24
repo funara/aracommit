@@ -2,16 +2,16 @@
 
 > **Created by Funara · Part of the ARA AI Ecosystem**
 >
-> Turn the changes you staged in Git into a clear, reviewable commit message—right inside VS Code.
+> Turn the changes you staged in Git into a clear, reviewable commit message.
 
-ARACommit is a VS Code extension that asks an AI provider to describe your staged changes. You choose the provider, model, language, and commit style. ARACommit generates a message in the Source Control view; you review it and decide when to commit.
+ARACommit is a VS Code extension that asks an AI provider to describe your staged changes. You choose the provider, model where available, language, and commit style. ARACommit generates a message in the Source Control view, you review it and decide when to commit.
 
 ## What it does
 
 - Analyzes **staged changes only**. Unstaged and untracked files are not included or staged for you.
-- Supports Conventional and **Gitmoji Conventional** messages.
+- Supports **Conventional** and **Gitmoji Conventional** messages.
 - Writes in ten bundled languages, including Indonesian, or a custom language you name.
-- Connects to cloud providers, local Ollama, or a custom OpenAI-compatible endpoint.
+- Connects to ARA Assistant, cloud providers, local Ollama, or a custom OpenAI-compatible endpoint.
 - Keeps provider credentials in VS Code SecretStorage rather than project settings.
 - Offers optional commit-message validation, custom instructions, and Smart Commit automation.
 
@@ -19,18 +19,19 @@ ARACommit is a VS Code extension that asks an AI provider to describe your stage
 
 1. Install ARACommit in VS Code.
 2. Open a Git repository and stage the changes you want the message to describe.
-3. In the extension sidebar, choose a provider and model. Add a credential if that provider requires one.
+3. In the extension sidebar, choose a provider and a model where available. Add a credential if that provider requires one.
 4. Focus the Source Control view and press <kbd>Ctrl</kbd>+<kbd>G</kbd> (<kbd>⌘</kbd>+<kbd>G</kbd> on macOS), click the extension's SCM action, or run **ARACommit: Generate Commit Message** from the Command Palette.
 5. Review and edit the message, then commit when you're ready.
 
-OpenRouter is the default provider. Its public model list can be loaded before a credential is added; generation still requires an OpenRouter key or sign-in. For setup help, see [Choose a provider](docs/walkthroughs/pick-provider.md) and [Provide credentials](docs/walkthroughs/set-api-key.md).
+ARA Assistant is the default provider. For other provider setup help, see [Choose a provider](docs/walkthroughs/pick-provider.md) and [Provide credentials](docs/walkthroughs/set-api-key.md).
 
 ## Providers
 
-The sidebar lists providers alphabetically. Cloud services require their own credentials; Ollama is local by default. Custom endpoints may be local or remote.
+The sidebar lists providers alphabetically. Most cloud services require their own credentials; ARA Assistant is keyless, and Ollama is local by default. Custom endpoints may be local or remote.
 
 | Provider | What to expect |
 |---|---|
+| ARA Assistant | ARA AI free model routing. |
 | Anthropic | Claude models; API key required; model choices use a curated list. |
 | Custom | Any compatible chat-completions endpoint; API key is optional. |
 | DeepSeek | Cloud API; API key required. |
@@ -53,6 +54,8 @@ ARACommit commits the Git index only. Even with Auto-commit enabled, unstaged ed
 ## Privacy and cost
 
 For cloud providers, ARACommit sends the staged diff to the selected service to generate a message. Review the provider's data handling terms and pricing, and do not send secrets or sensitive source code. A local Ollama instance keeps requests on that machine; a remote Ollama or Custom endpoint receives requests over the network. API credentials are stored in VS Code SecretStorage, not in `.aracommit/config.json`.
+
+ARA Assistant may sends staged changes and prompt context through a free third-party router; its service terms and privacy policy describe data use, while model providers may have their own retention and use policies. Do not use it with secrets, personal information, or confidential code. [Terms of Service](https://kilo.ai/terms) · [Data use](https://kilo.ai/privacy).
 
 ## Install from this repository
 

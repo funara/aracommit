@@ -16,7 +16,7 @@ const { generateViaOpenAICompatibleProvider, COMPAT } = vi.hoisted(() => ({
     generateViaOpenAICompatibleProvider: vi.fn(
         async (provider: string) => ({ message: `from-${provider}`, model: provider }),
     ),
-    COMPAT: new Set(['openai', 'openrouter', 'deepseek', 'xai', 'custom']),
+    COMPAT: new Set(['openai', 'openrouter', 'deepseek', 'xai', 'custom', 'araAssistant']),
 }));
 
 vi.mock('../src/services/geminiService', () => ({ GeminiService }));
@@ -54,7 +54,7 @@ describe('AIServiceFactory.generateCommitMessage routing', () => {
         expect(generateViaOpenAICompatibleProvider).not.toHaveBeenCalled();
     });
 
-    const compatCases: Provider[] = ['openai', 'openrouter', 'deepseek', 'xai', 'custom'];
+    const compatCases: Provider[] = ['openai', 'openrouter', 'deepseek', 'xai', 'custom', 'araAssistant'];
 
     it.each(compatCases)('routes %s through the OpenAI-compatible dispatcher', async (type) => {
         const opts = { maxTokens: 10 };

@@ -4,10 +4,43 @@
 const esbuild = require('esbuild');
 const fs = require('fs');
 const path = require('path');
+const { URL } = require('node:url');
 
 const production = process.argv.includes('--production');
 const watch = process.argv.includes('--watch');
 const analyze = process.argv.includes('--analyze');
+
+// These public routing values are kept out of tracked source and injected only
+// into the extension bundle. They remain inspectable in the shipped VSIX.
+const araAssistantEnvKeys = [
+    'ARA_ASSISTANT_ENDPOINT',
+    'ARA_ASSISTANT_PRIMARY_MODEL',
+    'ARA_ASSISTANT_SECONDARY_MODEL',
+];
+const projectRoot = path.dirname(require.resolve('./package.json'));
+const envPath = path.join(projectRoot, '.env');
+if (fs.existsSync(envPath)) {
+    process.loadEnvFile(envPath);
+}
+const araAssistantValues = araAssistantEnvKeys.map(key => (process.env[key] ?? '').trim());
+const configuredAraValues = araAssistantValues.filter(Boolean);
+if (configuredAraValues.length > 0 && configuredAraValues.length !== araAssistantEnvKeys.length) {
+    throw new Error('Configure all ARA_ASSISTANT_* values before building the extension.');
+}
+if (configuredAraValues.length) {
+    let endpoint;
+    try {
+        endpoint = new URL(araAssistantValues[0]);
+    } catch {
+        throw new Error('ARA_ASSISTANT_ENDPOINT must be an HTTPS URL without credentials, query, or fragment.');
+    }
+    if (endpoint.protocol !== 'https:' || endpoint.username || endpoint.password || endpoint.search || endpoint.hash) {
+        throw new Error('ARA_ASSISTANT_ENDPOINT must be an HTTPS URL without credentials, query, or fragment.');
+    }
+}
+const araAssistantDefine = Object.fromEntries(
+    araAssistantEnvKeys.map((key, index) => [`process.env.${key}`, JSON.stringify(araAssistantValues[index])]),
+);
 
 // Mirrors the problem-matcher format from
 // https://code.visualstudio.com/api/working-with-extensions/bundling-extension
@@ -42,6 +75,7 @@ const extensionBuildOptions = {
     minify: production,
     logLevel: 'info',
     metafile: analyze,
+    define: araAssistantDefine,
     plugins: [esbuildProblemMatcherPlugin],
 };
 

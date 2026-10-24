@@ -174,13 +174,22 @@ export class SettingsWebviewProvider implements vscode.WebviewViewProvider {
                     await this.refreshModelsFor(msg.provider, true);
                     return;
 
-                case 'setApiKey':
-                    await vscode.commands.executeCommand(providerDef(msg.provider).setCmd);
+                case 'setApiKey': {
+                    const command = providerDef(msg.provider).setCmd;
+                    if (!command) {
+                        return;
+                    }
+                    await vscode.commands.executeCommand(command);
                     await this.refreshModelsFor(msg.provider, true);
                     return;
+                }
 
                 case 'removeApiKey': {
-                    await vscode.commands.executeCommand(providerDef(msg.provider).removeCmd);
+                    const command = providerDef(msg.provider).removeCmd;
+                    if (!command) {
+                        return;
+                    }
+                    await vscode.commands.executeCommand(command);
                     this.invalidateModelsFor(msg.provider);
                     await this.pushState();
                     return;

@@ -6,16 +6,15 @@ import { UserCancelledError } from '../models/errors';
 import { PROVIDER_CATALOG } from '../services/providerCatalog';
 
 /**
- * Registers the per-provider set/remove API-key commands. Command ids and the
- * display name in notifications come from `providerCatalog.ts` — adding a
- * provider there is the only change needed to expose its commands.
+ * Registers the set/remove commands declared by provider metadata. Keyless
+ * providers omit those commands and cannot be assigned one from the webview.
  */
 export function registerSetApiKeyCommands(_context: vscode.ExtensionContext): vscode.Disposable[] {
     const disposables: vscode.Disposable[] = [];
 
     for (const meta of PROVIDER_CATALOG) {
-        disposables.push(
-            vscode.commands.registerCommand(meta.setCmd, async () => {
+        if (meta.setCmd) {
+            disposables.push(vscode.commands.registerCommand(meta.setCmd, async () => {
                 try {
                     await ApiKeyManager.promptForKey(meta.id);
                 } catch (error) {
@@ -27,8 +26,10 @@ export function registerSetApiKeyCommands(_context: vscode.ExtensionContext): vs
                         vscode.l10n.t('Failed to set API key: {0}', toError(error).message),
                     );
                 }
-            }),
-            vscode.commands.registerCommand(meta.removeCmd, async () => {
+            }));
+        }
+        if (meta.removeCmd) {
+            disposables.push(vscode.commands.registerCommand(meta.removeCmd, async () => {
                 try {
                     await ApiKeyManager.removeKey(meta.id);
                     await Logger.showInfo(
@@ -40,8 +41,8 @@ export function registerSetApiKeyCommands(_context: vscode.ExtensionContext): vs
                         vscode.l10n.t('Failed to remove API key: {0}', toError(error).message),
                     );
                 }
-            }),
-        );
+            }));
+        }
     }
 
     return disposables;

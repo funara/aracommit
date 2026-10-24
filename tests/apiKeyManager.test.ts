@@ -63,6 +63,11 @@ describe('ApiKeyManager.requiresKeyForCurrentConfig (F038)', () => {
         expect(ApiKeyManager.requiresKeyForCurrentConfig('custom')).toBe(true);
     });
 
+    it('returns false for the keyless ARA Assistant provider', async () => {
+        const { ApiKeyManager } = await import('../src/services/apiKeyManager');
+        expect(ApiKeyManager.requiresKeyForCurrentConfig('araAssistant')).toBe(false);
+    });
+
     it('returns false for unknown providers', async () => {
         const { ApiKeyManager } = await import('../src/services/apiKeyManager');
         expect(ApiKeyManager.requiresKeyForCurrentConfig('claude')).toBe(false);

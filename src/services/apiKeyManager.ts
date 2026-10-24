@@ -8,7 +8,7 @@ import { PROVIDER_CATALOG, ProviderMeta, isProvider, providerMeta } from './prov
 export class ApiKeyManager {
     private static secretStorage: vscode.SecretStorage;
     private static readonly knownSecretKeys: Set<string> = new Set(
-        PROVIDER_CATALOG.map(c => c.secretKey),
+        PROVIDER_CATALOG.flatMap(c => c.secretKey ? [c.secretKey] : []),
     );
 
     static initialize(secretStorage: vscode.SecretStorage, context: vscode.ExtensionContext): void {
@@ -40,7 +40,7 @@ export class ApiKeyManager {
         if (provider === 'custom') {
             return ConfigService.get('custom.useApiKey');
         }
-        return true;
+        return Boolean(this.getConfig(provider).secretKey);
     }
 
     private static getConfig(provider: string): ProviderMeta {
@@ -48,6 +48,17 @@ export class ApiKeyManager {
             throw new ConfigurationError(`Unknown API key provider: ${provider}`);
         }
         return providerMeta(provider);
+    }
+
+    private static getKeyConfig(provider: string): ProviderMeta & {
+        secretKey: string;
+        validateKey: (key: string) => string | null;
+    } {
+        const config = this.getConfig(provider);
+        if (!config.secretKey || !config.validateKey) {
+            throw new ConfigurationError(`${config.displayName} does not use an API key`);
+        }
+        return config as ProviderMeta & { secretKey: string; validateKey: (key: string) => string | null };
     }
 
     /**
@@ -65,7 +76,7 @@ export class ApiKeyManager {
     }
 
     static async getKey(provider: string): Promise<string> {
-        const config = this.getConfig(provider);
+        const config = this.getKeyConfig(provider);
         try {
             let key = await this.secretStorage.get(config.secretKey);
             Logger.registerSecret(key);
@@ -93,7 +104,7 @@ export class ApiKeyManager {
     }
 
     static async setKey(provider: string, key: string): Promise<void> {
-        const config = this.getConfig(provider);
+        const config = this.getKeyConfig(provider);
         try {
             const validationError = config.validateKey(key);
             if (validationError) {
@@ -117,7 +128,7 @@ export class ApiKeyManager {
     }
 
     static async removeKey(provider: string): Promise<void> {
-        const config = this.getConfig(provider);
+        const config = this.getKeyConfig(provider);
         try {
             Logger.forgetSecret(await this.secretStorage.get(config.secretKey));
             await this.secretStorage.delete(config.secretKey);
@@ -130,6 +141,9 @@ export class ApiKeyManager {
 
     static async getOptionalKey(provider: string): Promise<string | undefined> {
         const config = this.getConfig(provider);
+        if (!config.secretKey) {
+            return undefined;
+        }
         try {
             const key = await this.secretStorage.get(config.secretKey) ?? undefined;
             Logger.registerSecret(key);
@@ -141,7 +155,7 @@ export class ApiKeyManager {
     }
 
     static async promptForKey(provider: string): Promise<void> {
-        const config = this.getConfig(provider);
+        const config = this.getKeyConfig(provider);
         const key = await this.showApiKeyInputBox(config);
 
         if (key) {

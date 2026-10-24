@@ -185,9 +185,12 @@ export function renderModelAuthSection(state: ViewState): HTMLElement {
     const body = el('div');
 
     body.appendChild(renderProviderPick(state));
-    appendEndpointConfig(body, state, p);
-    appendModelPicker(body, state, p);
-    appendAuthControls(body, state, p);
+
+    if (p !== 'araAssistant') {
+        appendEndpointConfig(body, state, p);
+        appendModelPicker(body, state, p);
+        appendAuthControls(body, state, p);
+    }
 
     return section('modelAuth', L.modelAuth, true, body);
 }
@@ -443,4 +446,14 @@ export function renderAdvancedSection(state: ViewState): HTMLElement {
     }
 
     return section('advanced', L.advanced, true, body);
+}
+
+export function renderProviderNoticeSection(state: ViewState): HTMLDetailsElement | null {
+    if (state.provider !== 'araAssistant') {
+        return null;
+    }
+
+    const body = el('div');
+    body.appendChild(el('div', { class: 'hint info', role: 'note' }, [L.araAssistantPrivacy]));
+    return section('providerNotice', L.providerNotice, false, body);
 }

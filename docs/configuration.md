@@ -16,19 +16,19 @@ Until a workspace is trusted, project config cannot choose the provider or certa
 
 ## Provider and model
 
-Provider IDs are `anthropic`, `custom`, `deepseek`, `gemini`, `ollama`, `openai`, `openrouter`, and `xai`. The default is `openrouter`.
+Provider IDs are `anthropic`, `araAssistant`, `custom`, `deepseek`, `gemini`, `ollama`, `openai`, `openrouter`, and `xai`. The default is `araAssistant`. ARA Assistant's endpoint and automatic free routing are fixed by the extension build; it has no user-editable model setting or API-key command.
 
 | Setting | Default | Description |
 | --- | ---: | --- |
-| `aracommit.provider.type` | `"openrouter"` | Provider ID. |
-| `aracommit.anthropic.model` | `"claude-sonnet-4-5-20250929"` | Anthropic model ID; the picker uses a curated list. |
-| `aracommit.deepseek.model` | `"deepseek-chat"` | DeepSeek model ID. |
-| `aracommit.gemini.model` | `"auto"` | Gemini model ID or `auto` to try available models. |
+| `aracommit.provider.type` | `"araAssistant"` | Provider ID. |
+| `aracommit.anthropic.model` | `"claude-sonnet-5-5"` | Anthropic model ID; the picker uses a curated list. |
+| `aracommit.deepseek.model` | `"deepseek-v4-1-flash"` | DeepSeek model ID. |
+| `aracommit.gemini.model` | `"gemini-3-8-flash"` | Gemini model ID; `auto` can try available models. |
 | `aracommit.openai.model` | `"gpt-3.5-turbo"` | OpenAI model ID. |
 | `aracommit.openai.baseUrl` | `"https://api.openai.com/v1"` | OpenAI API base URL. Prefer Custom for a separate self-hosted OpenAI-compatible endpoint. |
 | `aracommit.openrouter.model` | `"meta-llama/llama-3.3-70b-instruct:free"` | OpenRouter model ID. The public model list loads without a credential; generation does not. |
 | `aracommit.openrouter.preferFreeModels` | `false` | Filter the model picker to free models. |
-| `aracommit.xai.model` | `"grok-3-mini"` | xAI model ID. |
+| `aracommit.xai.model` | `"grok-4-7"` | xAI model ID. |
 
 ### Custom and Ollama endpoints
 
@@ -36,7 +36,7 @@ Provider IDs are `anthropic`, `custom`, `deepseek`, `gemini`, `ollama`, `openai`
 | --- | ---: | --- |
 | `aracommit.custom.baseUrl` | `"http://localhost:1234/v1"` | Base URL for an OpenAI-compatible chat-completions endpoint. |
 | `aracommit.custom.chatCompletionsPath` | `"/chat/completions"` | Path appended to the Custom base URL. |
-| `aracommit.custom.model` | `""` | Free-form model ID exposed by the Custom endpoint. |
+| `aracommit.custom.model` | `""` | Model ID sent to the Custom endpoint. |
 | `aracommit.custom.useApiKey` | `false` | Whether to send the optional Custom API key. |
 | `aracommit.ollama.baseUrl` | `"http://localhost:11434"` | Ollama server URL. |
 | `aracommit.ollama.model` | `"llama3.2"` | Installed Ollama model. |
@@ -113,7 +113,7 @@ The older single-file `.aracommit` configuration is still recognized and migrate
 
 ## Credentials
 
-Set or remove a provider credential through the sidebar's **Model & Authentication** section or Command Palette. Exact current set-command titles are:
+Set or remove a provider credential through the sidebar's **Model & Authentication** section or Command Palette. ARA Assistant requires no credential. Exact current set-command titles are:
 
 - `ARACommit: Set Anthropic API Key`
 - `ARACommit: Set Custom API Key`

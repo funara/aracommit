@@ -6,11 +6,11 @@ const { sendMessage, setSetting } = vi.hoisted(() => ({ sendMessage: vi.fn(), se
 
 vi.mock('../src/views/webview/init', () => ({
     init: {
-        providers: ['custom'],
+        providers: ['custom', 'araAssistant'],
         formats: ['emojiKarma'],
         languages: ['english'],
         commitlintCompatFormats: [],
-        noRefreshProviders: ['anthropic'],
+        noRefreshProviders: ['anthropic', 'araAssistant'],
         settingKeys: {
             provider: 'provider',
             customBaseUrl: 'custom.baseUrl',
@@ -29,6 +29,7 @@ vi.mock('../src/views/webview/init', () => ({
         languageLabels: { english: 'English' },
         enableCustom: 'Enable custom instructions',
         modelAuth: 'Model & Authentication',
+        providerNotice: 'Provider Notice',
         model: 'Model',
         modelPlaceholder: 'Type a model ID',
         refresh: 'Refresh',
@@ -43,7 +44,8 @@ vi.mock('../src/views/webview/init', () => ({
         keyRequired: 'Credential required for generation',
         credentialsSecurelyStored: 'Stored securely',
         notInList: '(not in the current list)',
-        providerLabels: { custom: 'Custom (OpenAI-compatible)' },
+        providerLabels: { custom: 'Custom (OpenAI-compatible)', araAssistant: 'ARA Assistant' },
+        araAssistantPrivacy: 'Notes: Provider may send changes and prompt context to third-party AI services. See provider privacy policy for details.',
         setKey: 'Set key',
         removeKey: 'Remove',
         getKey: 'Get key',
@@ -68,15 +70,23 @@ vi.mock('../src/views/webview/vscodeApi', () => ({
     vscode: { getState: () => undefined, setState: vi.fn() },
 }));
 
-import { renderCommitSection, renderModelAuthSection } from '../src/views/webview/sections';
+import { renderCommitSection, renderModelAuthSection, renderProviderNoticeSection } from '../src/views/webview/sections';
 
-function makeState({ loading = false, saved = false, useApiKey = false } = {}): ViewState {
+function makeState({ loading = false, saved = false, useApiKey = false, provider = 'custom' }: {
+    loading?: boolean;
+    saved?: boolean;
+    useApiKey?: boolean;
+    provider?: 'custom' | 'araAssistant';
+} = {}): ViewState {
     return {
         projectOverrides: [],
-        provider: 'custom',
-        models: { custom: { list: ['vendor/model'], loading, error: null } },
-        selected: { custom: 'manual-model' },
-        hasApiKey: { custom: saved },
+        provider,
+        models: {
+            custom: { list: ['vendor/model'], loading, error: null },
+            araAssistant: { list: [], loading: false, error: null },
+        },
+        selected: { custom: 'manual-model', araAssistant: 'Automatic · Free' },
+        hasApiKey: { custom: saved, araAssistant: false },
         custom: {
             baseUrl: 'https://models.example/v1',
             useApiKey,
@@ -92,6 +102,31 @@ beforeEach(() => {
 });
 
 describe('Model & Authentication section', () => {
+    it('shows only the provider picker for ARA Assistant', () => {
+        const section = renderModelAuthSection(makeState({ provider: 'araAssistant' }));
+
+        expect(section.querySelector('.provider-pick')).not.toBeNull();
+        expect([...section.querySelectorAll('label.field')].map(label => label.textContent)).toEqual(['Provider']);
+        expect(section.querySelector('.hint.info')).toBeNull();
+        expect(section.textContent).not.toContain('Automatic · Free');
+        expect(section.textContent).not.toContain('No API key required.');
+        expect(section.querySelector('#model')).toBeNull();
+        expect(section.querySelector('.credential-heading')).toBeNull();
+        expect(section.querySelector('.auth-actions')).toBeNull();
+        expect(section.querySelectorAll('input[type="checkbox"], a')).toHaveLength(0);
+    });
+
+    it('renders a collapsed Provider Notice only for ARA Assistant', () => {
+        expect(renderProviderNoticeSection(makeState())).toBeNull();
+
+        const notice = renderProviderNoticeSection(makeState({ provider: 'araAssistant' }));
+        expect(notice?.open).toBe(false);
+        expect(notice?.querySelector('summary')?.textContent).toBe('Provider Notice');
+        expect(notice?.querySelector('[role="note"]')?.textContent).toBe(
+            'Notes: Provider may send changes and prompt context to third-party AI services. See provider privacy policy for details.'
+        );
+    });
+
     it('keeps provider, endpoint, model, and fetch controls together in order', () => {
         const section = renderModelAuthSection(makeState());
         document.body.appendChild(section);

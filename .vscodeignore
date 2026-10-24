@@ -18,9 +18,9 @@ esbuild.js
 tsconfig.json
 eslint.config.mjs
 
-# Environment and secrets
-.env
+# Include the root routing config; exclude other environment files
 .env.*
+!.env
 
 # Build artifacts
 **/*.map

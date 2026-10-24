@@ -24,17 +24,17 @@ export interface ProviderMeta {
      */
     displayName: string;
     /** SecretStorage key holding this provider's API key / auth token. */
-    secretKey: string;
+    secretKey?: string;
     /** Command id that prompts for + stores this provider's key. */
-    setCmd: string;
+    setCmd?: string;
     /** Command id that clears this provider's key. */
-    removeCmd: string;
+    removeCmd?: string;
     /** "Get a key" deep link; omitted for providers with no hosted console. */
     apiKeyUrl?: string;
     /** True when there is no live `/models` endpoint (UI hides refresh). */
     noRefresh?: boolean;
     /** Validates a pasted key; returns an error string or null when valid. */
-    validateKey: (key: string) => string | null;
+    validateKey?: (key: string) => string | null;
 }
 
 const lax = ApiKeyValidator.validateNonEmpty;
@@ -120,6 +120,12 @@ export const PROVIDER_CATALOG: readonly ProviderMeta[] = ([
         removeCmd: 'aracommit.removeCustomApiKey',
         // no hosted console
         validateKey: lax,
+    },
+    {
+        id: 'araAssistant',
+        label: 'ARA Assistant',
+        displayName: 'ARA Assistant',
+        noRefresh: true,
     },
 ] satisfies ProviderMeta[]).sort((a, b) => a.label.localeCompare(b.label));
 

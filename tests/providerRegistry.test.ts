@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const {
     mockGet,
+    mockGetModelFor,
     mockGetOptionalKey,
     fetchGeminiModels,
     fetchOpenAIModels,
@@ -13,6 +14,7 @@ const {
     fetchXaiModels,
 } = vi.hoisted(() => ({
     mockGet: vi.fn(),
+    mockGetModelFor: vi.fn(),
     mockGetOptionalKey: vi.fn(),
     fetchGeminiModels: vi.fn(),
     fetchOpenAIModels: vi.fn(),
@@ -25,7 +27,7 @@ const {
 }));
 
 vi.mock('../src/utils/configService', () => ({
-    ConfigService: { get: mockGet },
+    ConfigService: { get: mockGet, getModelFor: mockGetModelFor },
 }));
 
 vi.mock('../src/services/apiKeyManager', () => ({
@@ -56,6 +58,7 @@ import {
 beforeEach(() => {
     vi.clearAllMocks();
     mockGet.mockReturnValue(undefined);
+    mockGetModelFor.mockReturnValue('Automatic · Free');
     mockGetOptionalKey.mockResolvedValue('a-key');
     fetchGeminiModels.mockResolvedValue(['g']);
     fetchOpenAIModels.mockResolvedValue(['o']);
@@ -70,18 +73,20 @@ beforeEach(() => {
 describe('providerRegistry derived exports', () => {
     it('PROVIDERS lists ids alphabetically by display label', () => {
         expect(PROVIDERS).toEqual([
-            'anthropic', 'custom', 'deepseek', 'gemini',
+            'anthropic', 'araAssistant', 'custom', 'deepseek', 'gemini',
             'ollama', 'openai', 'openrouter', 'xai',
         ]);
     });
 
     it('NO_REFRESH_PROVIDERS contains only providers flagged noRefresh', () => {
-        expect([...NO_REFRESH_PROVIDERS]).toEqual(['anthropic']);
+        expect([...NO_REFRESH_PROVIDERS]).toEqual(['anthropic', 'araAssistant']);
     });
 
     it('SECRET_KEYS lists every secret key', () => {
         expect(SECRET_KEYS).toContain('aracommit.apiKey');
-        expect(SECRET_KEYS).toHaveLength(PROVIDER_DEFS.length);
+        expect(SECRET_KEYS).not.toContain(undefined);
+        expect(SECRET_KEYS).toHaveLength(PROVIDER_DEFS.filter(d => d.secretKey).length);
+        expect(providerDef('araAssistant').secretKey).toBeUndefined();
     });
 
     it('API_KEY_URLS only includes providers with a console link', () => {
@@ -126,6 +131,13 @@ describe('selectedModel() reads config per provider', () => {
 });
 
 describe('fetchModels() success paths', () => {
+    it('ARA Assistant uses the generic route label and needs no model-list request', async () => {
+        expect(providerDef('araAssistant').selectedModel()).toBe('Automatic · Free');
+        expect(mockGetModelFor).toHaveBeenCalledWith('araAssistant');
+        expect(await providerDef('araAssistant').fetchModels()).toEqual([]);
+        expect(mockGetOptionalKey).not.toHaveBeenCalled();
+    });
+
     it('gemini passes the resolved key', async () => {
         expect(await providerDef('gemini').fetchModels()).toEqual(['g']);
         expect(fetchGeminiModels).toHaveBeenCalledWith('a-key');

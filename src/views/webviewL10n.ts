@@ -10,6 +10,7 @@ export function buildWebviewL10n(): WebviewL10n {
     return {
         provider: vscode.l10n.t('Provider'),
         modelAuth: vscode.l10n.t('Model & Authentication'),
+        providerNotice: vscode.l10n.t('Provider Notice'),
         model: vscode.l10n.t('Model'),
         modelPlaceholder: vscode.l10n.t('Type a model ID'),
         refresh: vscode.l10n.t('Refresh'),
@@ -27,6 +28,7 @@ export function buildWebviewL10n(): WebviewL10n {
         keyRequired: vscode.l10n.t('Credential required for generation'),
         authDisabled: vscode.l10n.t('Authentication disabled'),
         credentialsSecurelyStored: vscode.l10n.t('Credentials are stored in VS Code SecretStorage.'),
+        araAssistantPrivacy: vscode.l10n.t('Notes: Provider may send changes and prompt context to third-party AI services. See provider privacy policy for details.'),
         useAuthToken: vscode.l10n.t('Use auth token'),
         useApiKey: vscode.l10n.t('Send API key'),
         preferFreeModels: vscode.l10n.t('Show free models only'),
